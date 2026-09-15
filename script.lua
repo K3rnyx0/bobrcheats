@@ -1,9 +1,93 @@
 -- bobrcheats v22.8 
 -- Xeno Executor
 
+-- локализация: загружаем словарь из GitHub
+local Locales = nil
+
+do
+    local LOCALES_URL = "https://raw.githubusercontent.com/K3rnyx0/bobrcheats/refs/heads/main/locales.lua"
+
+    local function loadFromGitHub()
+        local ok, response = pcall(function()
+            return game:HttpGet(LOCALES_URL, true)
+        end)
+        if ok and type(response) == "string" and #response > 0 then
+            local chunk = (loadstring or load)(response)
+            if chunk then
+                local ok2, result = pcall(chunk)
+                if ok2 and type(result) == "table" then
+                    return result
+                end
+            end
+        end
+        return nil
+    end
+
+    local dict = loadFromGitHub()
+
+    if dict then
+        local current = "en"
+
+        Locales = {
+            get = function() return current end,
+            set = function(lang)
+                if type(lang) ~= "string" then return false end
+                local key = lang:lower()
+                if key == "en" or key == "ru" then
+                    current = key
+                    return true
+                end
+                return false
+            end,
+            getLanguages = function()
+                return {
+                    { code = "en", name = "English" },
+                    { code = "ru", name = "Русский" },
+                }
+            end,
+            t = function(s, ...)
+                if type(s) ~= "string" then return s end
+                if current == "ru" then
+                    if select("#", ...) > 0 then
+                        local ok, r = pcall(string.format, s, ...)
+                        if ok then return r end
+                    end
+                    return s
+                end
+                local langDict = dict[current] or dict.en or {}
+                local translated = langDict[s] or s
+                if select("#", ...) > 0 then
+                    local ok, r = pcall(string.format, translated, ...)
+                    if ok then return r end
+                end
+                return translated
+            end,
+        }
+    else
+        warn("[bobrcheats] Locales file not loaded from GitHub — using built-in RU fallback")
+        Locales = {
+            get = function() return "ru" end,
+            set = function() return false end,
+            getLanguages = function()
+                return { { code = "ru", name = "Русский" } }
+            end,
+            t = function(s, ...)
+                if type(s) ~= "string" then return s end
+                if select("#", ...) > 0 then
+                    local ok, r = pcall(string.format, s, ...)
+                    if ok then return r end
+                end
+                return s
+            end,
+        }
+    end
+end
+
+Locales.set("en")
+
 -- защита от двойного запуска
 if getgenv().BOBRCHEATS_ACTIVE then
-    warn("[bobrcheats] Обнаружен предыдущий запуск! Выгружаем старый экземпляр...")
+    warn(Locales.t("Обнаружен предыдущий запуск! Выгружаем старый экземпляр..."))
     if getgenv().BOBRCHEATS_UNLOAD then
         getgenv().BOBRCHEATS_UNLOAD()
     end
@@ -90,7 +174,7 @@ end
 
 -- Быстрый детектор
 function DetectAntiCheat()
-    local info = {Found = false, List = {}, Message = "Сканирование..."}
+local info = {Found = false, List = {}, Message = Locales.t("Сканирование...")}
     local nameKeywords = {
         "anticheat", "anti cheat", "anti-cheat", "watchdog", "sentry",
         "byfron", "hyperion", "bloxwatch", "adonis", "kohls admin",
@@ -188,13 +272,13 @@ function DetectAntiCheat()
     if foundCount > 0 then
         info.Found = true
         info.List = foundObjects
-        info.Message = "⚠ Обнаружено подозрительных объектов: " .. foundCount
+info.Message = Locales.t("⚠ Обнаружено подозрительных объектов: ") .. foundCount
     else
         info.Found = false
-        info.Message = " Античит не обнаружен"
+info.Message = Locales.t(" Античит не обнаружен")
     end
 
-    print("[bobrcheats] Быстрый детектор: " .. info.Message)
+print(Locales.t("[bobrcheats] Быстрый детектор: ") .. info.Message)
     if info.Found then
         for i, item in ipairs(info.List) do
             print(string.format("  %d. [%s] %s (%s) -> %s", i, item.Container, item.Name, item.Class, item.Path))
@@ -207,13 +291,13 @@ end
 -- Глубокий детектор (по кнопке, облегчённый)
 function DeepDetectAntiCheat()
     DeepCheckStarting = true    -- Сообщение о запуске
-    print("[bobrcheats] Глубокая проверка: Запуск...")
-    UpdateAntiCheatStatus("Запуск глубокой проверки...", Color3.fromRGB(255, 255, 0))
+    print(Locales.t("Глубокая проверка: Запуск..."))
+    UpdateAntiCheatStatus(Locales.t("Запуск глубокой проверки..."), Color3.fromRGB(255, 255, 0))
 
     DeepCheckRunning = true
     DeepCheckCancelled = false
 
-    local info = {Found = false, List = {}, Message = "Сканирование..."}
+  local info = {Found = false, List = {}, Message = Locales.t("Сканирование...")}
     local totalObjects = 0
     local scannedObjects = 0
 
@@ -324,7 +408,7 @@ function DeepDetectAntiCheat()
         end
     end
 
-    print("[bobrcheats] Глубокая проверка: Сканирование...")
+print(Locales.t("Глубокая проверка: Сканирование..."))
     local lastPrintedPercent = -1
     for _, cont in ipairs(containers) do
         local cname, inst = cont[1], cont[2]
@@ -342,9 +426,9 @@ function DeepDetectAntiCheat()
                 i = stop + 1
                 local percent = math.floor(scannedObjects / totalObjects * 100)
 if percent >= 95 then
-    UpdateAntiCheatStatus("Окончание...", Color3.fromRGB(255, 255, 0))
+UpdateAntiCheatStatus(Locales.t("Окончание..."), Color3.fromRGB(255, 255, 0))
 else
-    UpdateAntiCheatStatus("Проверка: " .. percent .. "%", Color3.fromRGB(200, 200, 200))
+    UpdateAntiCheatStatus(Locales.t("Проверка: ") .. percent .. "%", Color3.fromRGB(200, 200, 200))
 end
                 task.wait(pause)
             end
@@ -387,19 +471,18 @@ end
 
     if DeepCheckCancelled then
         info.Found = false
-        info.Message = "⏹ Проверка остановлена"
-        print("[bobrcheats] Глубокая проверка остановлена пользователем.")
+        info.Message = Locales.t("⏹ Проверка остановлена")
+        print(Locales.t("Глубокая проверка остановлена пользователем."))
     else
-        print("[bobrcheats] Глубокая проверка: Окончание...")
+        print(Locales.t("Глубокая проверка: Окончание..."))
         if foundCount > 0 then
             info.Found = true
             info.List = foundObjects
-            info.Message = "⚠ Обнаружено подозрительных объектов: " .. foundCount
-        else
-            info.Found = false
-            info.Message = "✅ Античит не обнаружен"
-        end
-        print("[bobrcheats] Глубокая проверка завершена: " .. info.Message)
+            info.Message = Locales.t("⚠ Обнаружено подозрительных объектов: ") .. foundCount
+       else
+           info.Message = Locales.t("✅ Античит не обнаружен")
+       end
+           print(Locales.t("Глубокая проверка завершена: ") .. info.Message)
         if info.Found then
             for i, item in ipairs(info.List) do
                 print(string.format("  %d. [%s] %s (%s) -> %s", i, item.Container, item.Name, item.Class, item.Path))
@@ -407,7 +490,7 @@ end
         end
     end
 
-    UpdateAntiCheatStatus("Статус античита: " .. info.Message, info.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
+     UpdateAntiCheatStatus(Locales.t("Статус античита: ") .. info.Message, info.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
     DeepCheckRunning = false
     DeepCheckStarting = false
     return info
@@ -419,13 +502,13 @@ task.spawn(function()
     task.wait(2)
     local success, result = pcall(DetectAntiCheat)
     if not success then
-        warn("[bobrcheats] Ошибка быстрого детектора:", result)
-        UpdateAntiCheatStatus("Ошибка детектора", Color3.fromRGB(255, 100, 100))
+        warn(Locales.t("[bobrcheats] Ошибка быстрого детектора:"), result)
+        UpdateAntiCheatStatus(Locales.t("Ошибка детектора"), Color3.fromRGB(255, 100, 100))
         return
     end
     AntiCheatResult = result
-    UpdateAntiCheatStatus("Статус античита: " .. result.Message .. " (приблизительно)", result.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
-    print("[bobrcheats] Быстрый детектор завершён. Результат: " .. result.Message)
+UpdateAntiCheatStatus(Locales.t("Статус античита: ") .. result.Message .. " " .. Locales.t("(приблизительно)"), result.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
+print(Locales.t("[bobrcheats] Быстрый детектор завершён. Результат: ") .. result.Message)
 end)
 
 local RaycastParamsAvailable = pcall(function() return RaycastParams.new() end)
@@ -942,6 +1025,8 @@ local function ShowTabWarning(title, msg, onYes)
     warningCallbackYes = onYes
     for _, page in ipairs(TabPages) do page.Visible = false end
 end
+
+
 
 local function SelectTab(idx)
     currentTabIndex = idx
@@ -1749,6 +1834,54 @@ function GetTeamButtonColor(plr)
         return c, Color3.fromRGB(20, 20, 20)
     end
     return c, Color3.fromRGB(255, 255, 255)
+end
+
+-- обёртки для локализации
+local _CreateToggle = CreateToggle
+CreateToggle = function(parent, text, cb, default, warning)
+    return _CreateToggle(parent, Locales.t(text), cb, default,
+        warning and Locales.t(warning) or nil)
+end
+
+local _CreateFunctionRow = CreateFunctionRow
+CreateFunctionRow = function(parent, text, defaultVal, onToggle, buildFn, warning)
+    return _CreateFunctionRow(parent, Locales.t(text), defaultVal, onToggle,
+        buildFn, warning and Locales.t(warning) or nil)
+end
+
+local _CreateButton = CreateButton
+CreateButton = function(parent, text, onClick, color)
+    return _CreateButton(parent, Locales.t(text), onClick, color)
+end
+
+local _CreateSlider = CreateSlider
+CreateSlider = function(parent, text, min, max, default, cb, precision)
+    return _CreateSlider(parent, Locales.t(text), min, max, default, cb, precision)
+end
+
+local _CreateSliderInt = CreateSliderInt
+CreateSliderInt = function(parent, text, min, max, default, cb)
+    return _CreateSliderInt(parent, Locales.t(text), min, max, default, cb)
+end
+
+local _CreateModeSwitch = CreateModeSwitch
+CreateModeSwitch = function(parent, text, modes, default, cb)
+    return _CreateModeSwitch(parent, Locales.t(text), modes, default, cb)
+end
+
+local _CreateKeyBind = CreateKeyBind
+CreateKeyBind = function(parent, name, actionKey)
+    return _CreateKeyBind(parent, Locales.t(name), actionKey)
+end
+
+local _CreateColorPicker = CreateColorPicker
+CreateColorPicker = function(parent, text, default, cb)
+    return _CreateColorPicker(parent, Locales.t(text), default, cb)
+end
+
+local _ShowTabWarning = ShowTabWarning
+ShowTabWarning = function(title, msg, onYes)
+    return _ShowTabWarning(Locales.t(title), Locales.t(msg), onYes)
 end
 
 -- вкладки
@@ -2713,12 +2846,31 @@ CreateKeyBind(setPage, "BHop", "BHop")
 CreateKeyBind(setPage, "Freeze", "Freeze")
 CreateKeyBind(setPage, "Click TP", "ClickTP")
 
+CreateSection(setPage)
+
+local langNames = {}
+local currentLangName = ""
+for _, l in ipairs(Locales.getLanguages()) do
+    table.insert(langNames, l.name)
+    if l.code == Locales.get() then currentLangName = l.name end
+end
+
+CreateModeSwitch(setPage, Locales.t("Язык"), langNames, currentLangName, function(v)
+    for _, l in ipairs(Locales.getLanguages()) do
+        if l.name == v then
+            Locales.set(l.code)
+            print("[bobrcheats] Language: " .. l.code .. " (restart to apply)")
+            break
+        end
+    end
+end)
+
 -- античит и глубокая проверка
 antiCheatStatusLabel = Instance.new("TextLabel")
 antiCheatStatusLabel.Size = UDim2.new(1, -10, 0, 40)
 antiCheatStatusLabel.Position = UDim2.new(0, 5, 1, -85)
 antiCheatStatusLabel.BackgroundTransparency = 1
-antiCheatStatusLabel.Text = "Статус античита: Ожидание..."
+antiCheatStatusLabel.Text = Locales.t("Статус античита: Ожидание...")
 antiCheatStatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 antiCheatStatusLabel.Font = Enum.Font.Gotham
 antiCheatStatusLabel.TextSize = 12
@@ -2730,7 +2882,7 @@ local deepCheckBtn = Instance.new("TextButton")
 deepCheckBtn.Size = UDim2.new(0, 160, 0, 24)
 deepCheckBtn.Position = UDim2.new(0, 5, 1, -110)
 deepCheckBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-deepCheckBtn.Text = "Глубокая проверка"
+deepCheckBtn.Text = Locales.t("Глубокая проверка")
 deepCheckBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 deepCheckBtn.Font = Enum.Font.Gotham
 deepCheckBtn.TextSize = 11
@@ -2744,11 +2896,11 @@ deepCheckBtn.MouseButton1Click:Connect(function()
         -- Остановка проверки
         DeepCheckCancelled = true
         DeepCheckStarting = false
-        deepCheckBtn.Text = "Остановка..."
+        deepCheckBtn.Text = Locales.t("Остановка...")
         deepCheckBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
         task.spawn(function()
             repeat task.wait(0.1) until not DeepCheckRunning and not DeepCheckStarting
-            deepCheckBtn.Text = "Глубокая проверка"
+            deepCheckBtn.Text = Locales.t("Глубокая проверка")
             deepCheckBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         end)
         return
@@ -2757,22 +2909,22 @@ deepCheckBtn.MouseButton1Click:Connect(function()
     -- Запуск проверки
     ShowTabWarning("⚠ ВНИМАНИЕ", "Глубокая проверка может вызвать лаги или кратковременное зависание Roblox. Продолжить?", function()
         DeepCheckStarting = true
-        deepCheckBtn.Text = "Остановка"
+        deepCheckBtn.Text = Locales.t("Остановка")
         deepCheckBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        UpdateAntiCheatStatus("Запуск глубокой проверки...", Color3.fromRGB(255, 255, 0))
+        UpdateAntiCheatStatus(Locales.t("Запуск глубокой проверки..."), Color3.fromRGB(255, 255, 0))
 
         task.spawn(function()
             local res = DeepDetectAntiCheat()
             AntiCheatResult = res
 
             -- Определяем текст статуса без "приблизительно" для остановки
-            local statusText = "Статус античита: " .. res.Message
-            if not res.Message:find("остановлена") then
-                statusText = statusText .. " (приблизительно)"
-            end
+local statusText = Locales.t("Статус античита: ") .. res.Message
+if not res.Message:find(Locales.t("остановлена")) and not res.Message:find("stopped") then
+    statusText = statusText .. " " .. Locales.t("(приблизительно)")
+end
             UpdateAntiCheatStatus(statusText, res.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
 
-            deepCheckBtn.Text = "Глубокая проверка"
+            deepCheckBtn.Text = Locales.t("Глубокая проверка")
             deepCheckBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 
 if res.Found then
@@ -4886,8 +5038,9 @@ end
         triggerReactionStart = nil
         triggerFired = false
         triggerLastTarget = nil
-    end
-                UpdateHighlights()
+    end               
+
+    UpdateHighlights()
 
 -- рефреш списков tp/spec
     if currentTabIndex == 7 or currentTabIndex == 8 then
@@ -4922,7 +5075,6 @@ end
                     pcall(function() npcListFrame.CanvasPosition = p end)
                 end)
             end
-
         elseif currentTabIndex == 8 then
             task.spawn(function()
                 pcall(RefreshSpectateIfChanged)
@@ -4935,11 +5087,14 @@ end
     end               
 
     end)         
+
     if not ___ok and ___err and not getgenv()._BC_ERR_LOG then
         getgenv()._BC_ERR_LOG = true
         warn("[bobrcheats] Ошибка в главном цикле :", ___err)
     end
-end)       
+end)
+
+
 
 -- стартовая загрузка
 
@@ -5281,8 +5436,7 @@ function FULL_UNLOAD()
         root.AssemblyLinearVelocity = Vector3.zero
         root.AssemblyAngularVelocity = Vector3.zero
     end)
-
-    print("[bobrcheats] выгрузка завершена")
+    print(Locales.t("[bobrcheats] выгрузка завершена"))
 end
 
  -- фоновая проверка
@@ -5290,7 +5444,7 @@ lastBackgroundCheck  = tick() - 90
 
 function SetAutoCheckEnabled(val)
     Settings.AutoAntiCheatCheck = val
-    print("[bobrcheats] Фоновая проверка теперь: " .. tostring(val))
+    print(Locales.t("Фоновая проверка теперь: ") .. tostring(val))
     if ToggleRefs.AutoCheck then
         ToggleRefs.AutoCheck.SetState(val)
     end
@@ -5304,7 +5458,7 @@ function LightDetectAntiCheat()
         return nil
     end
 
-    local info = {Found = false, List = {}, Message = "Сканирование..."}
+local info = {Found = false, List = {}, Message = Locales.t("Сканирование...")}
     local nameKeywords = {
         "anticheat", "anti cheat", "anti-cheat", "watchdog", "sentry",
         "byfron", "hyperion", "bloxwatch", "adonis", "kohls admin",
@@ -5374,13 +5528,13 @@ function LightDetectAntiCheat()
         end
     end
 
-    if foundCount > 0 then
+        if foundCount > 0 then
         info.Found = true
         info.List = foundObjects
-        info.Message = "⚠ Подозрительные объекты: " .. foundCount
+        info.Message = Locales.t("⚠ Подозрительные объекты: ") .. foundCount
     else
         info.Found = false
-        info.Message = "✅ Античит не обнаружен"
+        info.Message = Locales.t("✅ Античит не обнаружен")
     end
     return info
 end
@@ -5395,9 +5549,11 @@ task.spawn(function()
             local res = LightDetectAntiCheat()
             if res then
                 AntiCheatResult = res
-                UpdateAntiCheatStatus("Фон. проверка: " .. res.Message .. " (приблизительно)",
-                    res.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
-                print("[bobrcheats] Фоновая проверка завершена: " .. res.Message)
+UpdateAntiCheatStatus(
+    Locales.t("Фон. проверка: ") .. res.Message .. " " .. Locales.t("(приблизительно)"),
+    res.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100)
+)
+print(Locales.t("[bobrcheats] Фоновая проверка завершена: ") .. res.Message)
 
                 if res.Found then
                     Settings.ESP_Enabled = false
@@ -5432,7 +5588,10 @@ end)
 
 
 if AntiCheatResult then
-    UpdateAntiCheatStatus("Статус античита: " .. AntiCheatResult.Message .. " (приблизительно)", AntiCheatResult.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
+    UpdateAntiCheatStatus(
+        Locales.t("Статус античита: ") .. AntiCheatResult.Message .. " " .. Locales.t("(приблизительно)"),
+        AntiCheatResult.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100)
+    )
 end
 
 getgenv().BOBRCHEATS_UNLOAD = FULL_UNLOAD
@@ -5452,7 +5611,7 @@ task.spawn(function()
     task.wait(0.5)
     LoadingGui:Destroy()
     ShowMainMenu()
-    print("[bobrcheats v22.8] Меню загружено.")
+    print(Locales.t("[bobrcheats v22.8] Меню загружено."))
 end)
 
-print("[bobrcheats v22.8] Загрузка...")
+print(Locales.t("[bobrcheats v22.8] Загрузка..."))
