@@ -5,7 +5,7 @@
 local Locales = nil
 
 do
-    local LOCALES_URL = "https://raw.githubusercontent.com/K3rnyx0/bobrcheats/refs/heads/main/locales.lua"
+  local LOCALES_URL = "https://raw.githubusercontent.com/K3rnyx0/bobrcheats/refs/heads/main/locales.lua?v=" .. tostring(tick())
 
     local function loadFromGitHub()
         local ok, response = pcall(function()
@@ -83,7 +83,12 @@ do
     end
 end
 
-Locales.set("en")
+local savedLang = getgenv().BOBRCHEATS_LANG
+if type(savedLang) == "string" then
+    Locales.set(savedLang)
+else
+    Locales.set("en")
+end
 
 -- защита от двойного запуска
 if getgenv().BOBRCHEATS_ACTIVE then
@@ -2060,7 +2065,7 @@ CreateSection(movePage)
 local suicideBtn = Instance.new("TextButton")
 suicideBtn.Size = UDim2.new(1, 0, 0, 30)
 suicideBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-suicideBtn.Text = "Suicide (мгновенная смерть)"
+suicideBtn.Text = Locales.t("Suicide (мгновенная смерть)")
 suicideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 suicideBtn.Font = Enum.Font.GothamBold
 suicideBtn.TextSize = 13
@@ -2857,9 +2862,20 @@ end
 
 CreateModeSwitch(setPage, Locales.t("Язык"), langNames, currentLangName, function(v)
     for _, l in ipairs(Locales.getLanguages()) do
-        if l.name == v then
-            Locales.set(l.code)
-            print("[bobrcheats] Language: " .. l.code .. " (restart to apply)")
+        if l.name == v and l.code ~= Locales.get() then
+            getgenv().BOBRCHEATS_LANG = l.code
+            print("[bobrcheats] Switching to " .. l.code .. "...")
+            task.spawn(function()
+                task.wait(0.15)
+                local url = "https://raw.githubusercontent.com/K3rnyx0/bobrcheats/refs/heads/main/script.lua?v=" .. tostring(tick())
+                local ok, code = pcall(function() return game:HttpGet(url, true) end)
+                if ok and code then
+                    local fn = loadstring(code)
+                    if fn then
+                        fn()
+                    end
+                end
+            end)
             break
         end
     end
