@@ -9,13 +9,21 @@ how to load:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/K3rnyx0/bobrcheats/refs/heads/main/script.lua"))()
 
 features:
+
 -ESP
+
 -Aimbot
+
 -Triggerbot
+
 -Speed
+
 -Flight
+
 -Noclip
+
 -God Mode
+
 -Teleport
 
 -and some stuff you don't see everywhere:
