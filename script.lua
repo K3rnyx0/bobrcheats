@@ -124,10 +124,13 @@ pcall(function()
     end
 end)
 pcall(function()
-local pg = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui", 3)
-    if pg then
-        if pg:FindFirstChild("_menu") then pg._menu:Destroy() end
-        if pg:FindFirstChild("_load") then pg._load:Destroy() end
+    if gethui then
+        local ok, h = pcall(gethui)
+        if ok and h then
+            if h:FindFirstChild("_menu") then h._menu:Destroy() end
+            if h:FindFirstChild("_load") then h._load:Destroy() end
+            if h:FindFirstChild("_bobr_container") then h._bobr_container:Destroy() end
+        end
     end
 end)
 
@@ -772,21 +775,46 @@ end
 
 local function fastClick()
     mouse1press()
-    task.wait(0.01)   -- небольшая задержка для корректного распознавания клика
+    task.wait(0.01)
     mouse1release()
 end
+
+-- Ждём полной загрузки игры и CoreGui
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+task.wait(1) 
 
 -- контейнер для нашего GUI
 local SafeParent
 do
-    local target = LocalPlayer:WaitForChild("PlayerGui")
+    local parent = nil
+    if gethui then
+        local ok, hui = pcall(gethui)
+        if ok and hui then
+            parent = hui
+        end
+    end
+    if not parent then
+        -- fallback: используем PlayerGui
+        parent = LocalPlayer:WaitForChild("PlayerGui")
+    end
 
-    local existing = target:FindFirstChild("_bobr_container")
+    -- Чистим старый контейнер
+    local existing = parent:FindFirstChild("_bobr_container")
     if existing then existing:Destroy() end
+
+    pcall(function()
+        local pg = LocalPlayer:FindFirstChild("PlayerGui")
+        if pg then
+            local old = pg:FindFirstChild("_bobr_container")
+            if old then old:Destroy() end
+        end
+    end)
 
     local container = Instance.new("Folder")
     container.Name = "_bobr_container"
-    container.Parent = target
+    container.Parent = parent
     SafeParent = container
 end
 
