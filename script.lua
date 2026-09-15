@@ -788,46 +788,32 @@ task.wait(1)
 -- контейнер для нашего GUI
 local SafeParent
 do
-    local parent = nil
-    if gethui then
-        local ok, hui = pcall(gethui)
-        if ok and hui then
-            parent = hui
-        end
-    end
-    if not parent then
-        -- fallback: используем PlayerGui
-        parent = LocalPlayer:WaitForChild("PlayerGui")
-    end
+    local target = LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Чистим старый контейнер
-    local existing = parent:FindFirstChild("_bobr_container")
+    local existing = target:FindFirstChild("_bobr_container")
     if existing then existing:Destroy() end
-
-    pcall(function()
-        local pg = LocalPlayer:FindFirstChild("PlayerGui")
-        if pg then
-            local old = pg:FindFirstChild("_bobr_container")
-            if old then old:Destroy() end
-        end
-    end)
 
     local container = Instance.new("Folder")
     container.Name = "_bobr_container"
-    container.Parent = parent
+    container.Parent = target
     SafeParent = container
 end
 
-do
+pcall(function()
     local _new = Instance.new
-    Instance.new = function(class, parent)
-        local obj = _new(class, parent)
-        if class == "TextLabel" or class == "TextButton" or class == "TextBox" then
-            pcall(function() obj.AutoLocalize = false end)
+    local hookOk = pcall(function()
+        Instance.new = function(class, parent)
+            local obj = _new(class, parent)
+            if class == "TextLabel" or class == "TextButton" or class == "TextBox" then
+                pcall(function() obj.AutoLocalize = false end)
+            end
+            return obj
         end
-        return obj
+    end)
+    if not hookOk then
+        warn("[bobrcheats] Не удалось установить хук Instance.new — пропускаем (AutoLocalize будет отключён вручную)")
     end
-end
+end)
 
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "_load"
