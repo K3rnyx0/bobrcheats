@@ -123,10 +123,10 @@ return {
         ["Freeze Character"] = "Freeze character",
         ["Изменить гравитацию"] = "Change gravity",
         ["Значение"] = "Value",
-        ["Click TP (телепорт в точку клика)"] = "Click TP (teleport where you click)",
+        ["Click TP (телепорт в точку клика)"] = "Click TP",
         ["Макс. дистанция TP"] = "Max TP distance",
         ["Клавиша Click TP"] = "Click TP key",
-        ["Suicide (мгновенная смерть)"] = "Suicide (instant death)",
+        ["Suicide (мгновенная смерть)"] = "Suicide",
 
         -- AIM
         ["Aimbot"] = "Aimbot",
@@ -162,7 +162,7 @@ return {
         ["Отступ от центра"] = "Gap from center",
         ["Точка в центре"] = "Center dot",
         ["Размер точки"] = "Dot size",
-        ["T-стиль (скрыть верх)"] = "T-style (hide top)",
+        ["T-стиль (скрыть верх)"] = "T-style",
         ["Обводка"] = "Outline",
         ["Толщина обводки"] = "Outline thickness",
         ["Цвет обводки"] = "Outline color",
