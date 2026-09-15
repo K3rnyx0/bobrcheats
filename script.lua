@@ -857,7 +857,12 @@ LoadingPercent.Parent = LoadingFrame
 TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0.2}):Play()
 
 -- главное окно
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "_menu"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = SafeParent
+ScreenGui.Enabled = false
 
 -- курсор
 local CustomCursor = Instance.new("ImageLabel")
