@@ -770,11 +770,25 @@ local function fastClick()
 end
 
 -- экран загрузки
+local SafeParent = CoreGui
+do
+    local target = CoreGui
+    if gethui then
+        local ok, h = pcall(gethui)
+        if ok and h then target = h end
+    end
+    local existing = target:FindFirstChild("_bobr_container")
+    if existing then existing:Destroy() end
+    local container = Instance.new("Folder")
+    container.Name = "_bobr_container"
+    container.Parent = target
+    SafeParent = container
+end
+
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "_load"
-local guiParent = CoreGui
-pcall(function() if gethui then guiParent = gethui() end end)
-LoadingGui.Parent = guiParent
+LoadingGui.ResetOnSpawn = false
+LoadingGui.Parent = SafeParent
 
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 400, 0, 240)
@@ -843,12 +857,7 @@ LoadingPercent.Parent = LoadingFrame
 TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0.2}):Play()
 
 -- главное окно
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "_menu"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = guiParent
-ScreenGui.Enabled = false
+ScreenGui.Parent = SafeParent
 
 -- курсор
 local CustomCursor = Instance.new("ImageLabel")
