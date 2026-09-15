@@ -799,21 +799,6 @@ do
     SafeParent = container
 end
 
-pcall(function()
-    local _new = Instance.new
-    local hookOk = pcall(function()
-        Instance.new = function(class, parent)
-            local obj = _new(class, parent)
-            if class == "TextLabel" or class == "TextButton" or class == "TextBox" then
-                pcall(function() obj.AutoLocalize = false end)
-            end
-            return obj
-        end
-    end)
-    if not hookOk then
-        warn("[bobrcheats] Не удалось установить хук Instance.new — пропускаем (AutoLocalize будет отключён вручную)")
-    end
-end)
 
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "_load"
@@ -894,35 +879,7 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = SafeParent
 ScreenGui.Enabled = false
 
-local function killAutoLocalize(root)
-    if not root then return end
-    for _, obj in ipairs(root:GetDescendants()) do
-        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-            pcall(function() obj.AutoLocalize = false end)
-        end
-    end
-end
 
-pcall(function() ScreenGui.AutoLocalize = false end)
-pcall(function() LoadingGui.AutoLocalize = false end)
-
--- подписка на новые элементы
-if not getgenv()._BC_LOCALIZE_HOOKED then
-    getgenv()._BC_LOCALIZE_HOOKED = true
-    local function hook(inst)
-        if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
-            pcall(function() inst.AutoLocalize = false end)
-        end
-    end
-    if ScreenGui then
-        ScreenGui.DescendantAdded:Connect(hook)
-        killAutoLocalize(ScreenGui)
-    end
-    if LoadingGui then
-        LoadingGui.DescendantAdded:Connect(hook)
-        killAutoLocalize(LoadingGui)
-    end
-end
 
 -- курсор
 local CustomCursor = Instance.new("ImageLabel")
