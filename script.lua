@@ -776,21 +776,10 @@ local function fastClick()
     mouse1release()
 end
 
--- контейнер для нашего GUI
+-- контейнер для нашего GUI (только PlayerGui, чтобы Roblox не спамил локализацией)
 local SafeParent
 do
-    local target = nil
-
-    if gethui then
-        local ok, h = pcall(gethui)
-        if ok and h and h ~= CoreGui then
-            target = h
-        end
-    end
-
-    if not target then
-        target = LocalPlayer:WaitForChild("PlayerGui")
-    end
+    local target = LocalPlayer:WaitForChild("PlayerGui")
 
     local existing = target:FindFirstChild("_bobr_container")
     if existing then existing:Destroy() end
