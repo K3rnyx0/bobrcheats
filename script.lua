@@ -2285,8 +2285,8 @@ end
 -- вкладка spectate
 local specPage = TabPages[8]
 local specTopFrame = Instance.new("Frame") specTopFrame.Size = UDim2.new(1, 0, 0, 60) specTopFrame.BackgroundTransparency = 1 specTopFrame.ZIndex = 100 specTopFrame.Parent = specPage
-local stopBtn = Instance.new("TextButton") stopBtn.Size = UDim2.new(1, -10, 0, 25) stopBtn.Position = UDim2.new(0, 5, 0, 0) stopBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) stopBtn.Text = "⛔ Остановить" stopBtn.TextColor3 = Color3.fromRGB(255,255,255) stopBtn.Font = Enum.Font.GothamBold stopBtn.TextSize = 13 stopBtn.ZIndex = 101 stopBtn.Active = true stopBtn.Parent = specTopFrame Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 4)
-local tpSpecBtn = Instance.new("TextButton") tpSpecBtn.Size = UDim2.new(1, -10, 0, 25) tpSpecBtn.Position = UDim2.new(0, 5, 0, 32) tpSpecBtn.BackgroundColor3 = Color3.fromRGB(40,40,40) tpSpecBtn.Text = "ТП к цели" tpSpecBtn.TextColor3 = Color3.fromRGB(255,255,255) tpSpecBtn.Font = Enum.Font.GothamBold tpSpecBtn.TextSize = 13 tpSpecBtn.ZIndex = 101 tpSpecBtn.Active = true tpSpecBtn.Parent = specTopFrame Instance.new("UICorner", tpSpecBtn).CornerRadius = UDim.new(0, 4)
+local stopBtn = Instance.new("TextButton") stopBtn.Size = UDim2.new(1, -10, 0, 25) stopBtn.Position = UDim2.new(0, 5, 0, 0) stopBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40) stopBtn.Text = Locales.t("⛔ Остановить") stopBtn.TextColor3 = Color3.fromRGB(255,255,255) stopBtn.Font = Enum.Font.GothamBold stopBtn.TextSize = 13 stopBtn.ZIndex = 101 stopBtn.Active = true stopBtn.Parent = specTopFrame Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 4)
+local tpSpecBtn = Instance.new("TextButton") tpSpecBtn.Size = UDim2.new(1, -10, 0, 25) tpSpecBtn.Position = UDim2.new(0, 5, 0, 32) tpSpecBtn.BackgroundColor3 = Color3.fromRGB(40,40,40) tpSpecBtn.Text = Locales.t("ТП к цели") tpSpecBtn.TextColor3 = Color3.fromRGB(255,255,255) tpSpecBtn.Font = Enum.Font.GothamBold tpSpecBtn.TextSize = 13 tpSpecBtn.ZIndex = 101 tpSpecBtn.Active = true tpSpecBtn.Parent = specTopFrame Instance.new("UICorner", tpSpecBtn).CornerRadius = UDim.new(0, 4)
 stopBtn.MouseButton1Click:Connect(StopSpectate)
 
 tpSpecBtn.MouseButton1Click:Connect(function()
@@ -2604,9 +2604,9 @@ local favLayout = Instance.new("UIListLayout") favLayout.Padding=UDim.new(0,4) f
 favLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() favListFrame.CanvasSize=UDim2.new(0,0,0,favLayout.AbsoluteContentSize.Y+10) end)
 
 local tpActionsFrame = Instance.new("Frame") tpActionsFrame.Size=UDim2.new(1,0,0,70) tpActionsFrame.BackgroundTransparency=1 tpActionsFrame.Parent=tpPage
-local saveLocBtn = Instance.new("TextButton") saveLocBtn.Size=UDim2.new(1,-10,0,22) saveLocBtn.Position=UDim2.new(0,5,0,0) saveLocBtn.BackgroundColor3=Color3.fromRGB(40,40,40) saveLocBtn.Text="Сохранить позицию" saveLocBtn.TextColor3=Color3.fromRGB(255,255,255) saveLocBtn.Font=Enum.Font.GothamBold saveLocBtn.TextSize=11 saveLocBtn.Parent=tpActionsFrame
-local tpLastBtn = Instance.new("TextButton") tpLastBtn.Size=UDim2.new(1,-10,0,22) tpLastBtn.Position=UDim2.new(0,5,0,28) tpLastBtn.BackgroundColor3=Color3.fromRGB(40,40,40) tpLastBtn.Text="ТП к последней сохр." tpLastBtn.TextColor3=Color3.fromRGB(255,255,255) tpLastBtn.Font=Enum.Font.GothamBold tpLastBtn.TextSize=11 tpLastBtn.Parent=tpActionsFrame
-local spawnBtn = Instance.new("TextButton") spawnBtn.Size=UDim2.new(1,-10,0,22) spawnBtn.Position=UDim2.new(0,5,0,56) spawnBtn.BackgroundColor3=Color3.fromRGB(40,40,40) spawnBtn.Text="ТП на спавн" spawnBtn.TextColor3=Color3.fromRGB(255,255,255) spawnBtn.Font=Enum.Font.GothamBold spawnBtn.TextSize=11 spawnBtn.Parent=tpActionsFrame
+local saveLocBtn = Instance.new("TextButton") saveLocBtn.Size=UDim2.new(1,-10,0,22) saveLocBtn.Position=UDim2.new(0,5,0,0) saveLocBtn.BackgroundColor3=Color3.fromRGB(40,40,40) saveLocBtn.Text=Locales.t("Сохранить позицию") saveLocBtn.TextColor3=Color3.fromRGB(255,255,255) saveLocBtn.Font=Enum.Font.GothamBold saveLocBtn.TextSize=11 saveLocBtn.Parent=tpActionsFrame
+local tpLastBtn = Instance.new("TextButton") tpLastBtn.Size=UDim2.new(1,-10,0,22) tpLastBtn.Position=UDim2.new(0,5,0,28) tpLastBtn.BackgroundColor3=Color3.fromRGB(40,40,40) tpLastBtn.Text=Locales.t("ТП к последней сохр.") tpLastBtn.TextColor3=Color3.fromRGB(255,255,255) tpLastBtn.Font=Enum.Font.GothamBold tpLastBtn.TextSize=11 tpLastBtn.Parent=tpActionsFrame
+local spawnBtn = Instance.new("TextButton") spawnBtn.Size=UDim2.new(1,-10,0,22) spawnBtn.Position=UDim2.new(0,5,0,56) spawnBtn.BackgroundColor3=Color3.fromRGB(40,40,40) spawnBtn.Text=Locales.t("ТП на спавн") spawnBtn.TextColor3=Color3.fromRGB(255,255,255) spawnBtn.Font=Enum.Font.GothamBold spawnBtn.TextSize=11 spawnBtn.Parent=tpActionsFrame
 
 local playerListFrame = Instance.new("ScrollingFrame") playerListFrame.Size=UDim2.new(1,0,0,200) playerListFrame.BackgroundTransparency=1 playerListFrame.BorderSizePixel=0 playerListFrame.ScrollBarThickness=3 playerListFrame.ScrollBarImageColor3=Color3.fromRGB(60,60,60) playerListFrame.CanvasSize=UDim2.new(0,0,0,0) playerListFrame.Parent=tpPage
 local tpLayout = Instance.new("UIListLayout") tpLayout.Padding=UDim.new(0,4) tpLayout.Parent=playerListFrame
@@ -2617,7 +2617,7 @@ local npcLayout = Instance.new("UIListLayout") npcLayout.Padding=UDim.new(0,4) n
 npcLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() npcListFrame.CanvasSize=UDim2.new(0,0,0,npcLayout.AbsoluteContentSize.Y+10) end)
 
 local savedFrame = Instance.new("Frame") savedFrame.Size=UDim2.new(1,0,0,150) savedFrame.BackgroundTransparency=1 savedFrame.Parent=tpPage
-local clearSavedBtn = Instance.new("TextButton") clearSavedBtn.Size=UDim2.new(1,-10,0,22) clearSavedBtn.Position=UDim2.new(0,5,0,0) clearSavedBtn.BackgroundColor3=Color3.fromRGB(200,40,40) clearSavedBtn.Text="Очистить все сохр." clearSavedBtn.TextColor3=Color3.fromRGB(255,255,255) clearSavedBtn.Font=Enum.Font.GothamBold clearSavedBtn.TextSize=11 clearSavedBtn.Parent=savedFrame
+local clearSavedBtn = Instance.new("TextButton") clearSavedBtn.Size=UDim2.new(1,-10,0,22) clearSavedBtn.Position=UDim2.new(0,5,0,0) clearSavedBtn.BackgroundColor3=Color3.fromRGB(200,40,40) clearSavedBtn.Text=Locales.t("Очистить все сохр.") clearSavedBtn.TextColor3=Color3.fromRGB(255,255,255) clearSavedBtn.Font=Enum.Font.GothamBold clearSavedBtn.TextSize=11 clearSavedBtn.Parent=savedFrame
 local savedListFrame = Instance.new("ScrollingFrame") savedListFrame.Size=UDim2.new(1,0,0,110) savedListFrame.Position=UDim2.new(0,0,0,26) savedListFrame.BackgroundTransparency=1 savedListFrame.BorderSizePixel=0 savedListFrame.ScrollBarThickness=3 savedListFrame.ScrollBarImageColor3=Color3.fromRGB(60,60,60) savedListFrame.CanvasSize=UDim2.new(0,0,0,0) savedListFrame.Parent=savedFrame
 local savedLayout = Instance.new("UIListLayout") savedLayout.Padding=UDim.new(0,4) savedLayout.Parent=savedListFrame
 savedLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() savedListFrame.CanvasSize=UDim2.new(0,0,0,savedLayout.AbsoluteContentSize.Y+10) end)
@@ -2991,7 +2991,10 @@ end)
 
 -- Если быстрый детектор уже завершился, обновим статус
 if AntiCheatResult then
-    UpdateAntiCheatStatus("Статус античита: " .. AntiCheatResult.Message .. " (приблизительно)", AntiCheatResult.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100))
+    UpdateAntiCheatStatus(
+        Locales.t("Статус античита: ") .. AntiCheatResult.Message .. " " .. Locales.t("(приблизительно)"),
+        AntiCheatResult.Found and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 200, 100)
+    )
 end
 
 -- анимации меню
