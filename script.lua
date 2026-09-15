@@ -776,7 +776,7 @@ local function fastClick()
     mouse1release()
 end
 
--- контейнер для нашего GUI (только PlayerGui, чтобы Roblox не спамил локализацией)
+-- контейнер для нашего GUI
 local SafeParent
 do
     local target = LocalPlayer:WaitForChild("PlayerGui")
@@ -788,6 +788,17 @@ do
     container.Name = "_bobr_container"
     container.Parent = target
     SafeParent = container
+end
+
+do
+    local _new = Instance.new
+    Instance.new = function(class, parent)
+        local obj = _new(class, parent)
+        if class == "TextLabel" or class == "TextButton" or class == "TextBox" then
+            pcall(function() obj.AutoLocalize = false end)
+        end
+        return obj
+    end
 end
 
 local LoadingGui = Instance.new("ScreenGui")
