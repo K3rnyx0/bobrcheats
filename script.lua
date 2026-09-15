@@ -123,6 +123,13 @@ pcall(function()
         if h:FindFirstChild("_load") then h._load:Destroy() end
     end
 end)
+pcall(function()
+local pg = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui", 3)
+    if pg then
+        if pg:FindFirstChild("_menu") then pg._menu:Destroy() end
+        if pg:FindFirstChild("_load") then pg._load:Destroy() end
+    end
+end)
 
 -- сервисы
 local Players = game:GetService("Players")
@@ -769,16 +776,25 @@ local function fastClick()
     mouse1release()
 end
 
--- экран загрузки
-local SafeParent = CoreGui
+-- контейнер для нашего GUI
+local SafeParent
 do
-    local target = CoreGui
+    local target = nil
+
     if gethui then
         local ok, h = pcall(gethui)
-        if ok and h then target = h end
+        if ok and h and h ~= CoreGui then
+            target = h
+        end
     end
+
+    if not target then
+        target = LocalPlayer:WaitForChild("PlayerGui")
+    end
+
     local existing = target:FindFirstChild("_bobr_container")
     if existing then existing:Destroy() end
+
     local container = Instance.new("Folder")
     container.Name = "_bobr_container"
     container.Parent = target
