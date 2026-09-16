@@ -1,7 +1,4 @@
 -- locales.lua — словарь переводов для bobrcheats
--- RU-режим: возвращает строку как есть (пасс-сру).
--- EN-режим:  смотрит в dict.en[русский_ключ] → английский.
--- Технические термины (Chams, Aimbot, Flight и т.д.) НЕ переводятся.
 return {
     en = {
         -- ===== загрузка / античит =====
@@ -31,13 +28,9 @@ return {
         ["Фон. проверка: "] = "Background scan: ",
         ["Фоновая проверка теперь: "] = "Background scan is now: ",
         ["Фоновая проверка завершена: "] = "Background scan complete: ",
-        ["[bobrcheats] Фоновая проверка завершена: "] = "[bobrcheats] Background scan complete: ",
-        ["[bobrcheats] Быстрый детектор: "] = "[bobrcheats] Quick scan: ",
-        ["[bobrcheats] Быстрый детектор завершён. Результат: "] = "[bobrcheats] Quick scan complete. Result: ",
         ["Обнаружен предыдущий запуск! Выгружаем старый экземпляр..."] = "Previous instance detected! Unloading it...",
         ["[bobrcheats v22.8] Загрузка..."] = "[bobrcheats v22.8] Loading...",
         ["[bobrcheats v22.8] Меню загружено."] = "[bobrcheats v22.8] Menu loaded.",
-        ["[bobrcheats] ПОЛНАЯ ВЫГРУЗКА ЗАВЕРШЕНА"] = "[bobrcheats] FULL UNLOAD COMPLETE",
 
         -- ===== диалоги =====
         ["⚠ ВНИМАНИЕ"] = "⚠ WARNING",
@@ -55,7 +48,7 @@ return {
         ["Вы отключаете все предупреждения о риске бана. Продолжить?"] = "You're about to disable all ban-risk warnings. Continue?",
         ["Телепорт может вызвать кик. Продолжить?"] = "Teleporting may get you kicked. Continue?",
 
-        -- ===== ESP (главная вкладка) =====
+        -- ===== ESP =====
         ["ESP Вкл/Выкл"] = "ESP On/Off",
         ["Только враги"] = "Enemies only",
         ["Рамки"] = "Boxes",
@@ -87,20 +80,19 @@ return {
 
         -- ===== NPC =====
         ["ESP на NPC"] = "ESP on NPCs",
-        ["Свои размеры для NPC"] = "Custom NPC sizes",
         ["Имена NPC"] = "NPC names",
         ["Здоровье NPC"] = "NPC health",
         ["Линии к NPC"] = "NPC tracers",
         ["Дистанция NPC"] = "NPC distance",
         ["Макс. дистанция"] = "Max distance",
         ["Яркость Chams NPC"] = "NPC Chams brightness",
+        ["Chams NPC"] = "NPC Chams",
 
         -- ===== MOVE =====
         ["Скорость бега"] = "Walk speed",
         ["Скорость полёта"] = "Flight speed",
         ["Интервал (сек)"] = "Interval (sec)",
         ["Длит. шага (сек)"] = "Step duration (sec)",
-        ["Пауза Anti-AFK"] = "Pause Anti-AFK",
         ["Задержка прыжка"] = "Jump delay",
         ["Задержка между кликами"] = "Delay between clicks",
         ["Время нажатия"] = "Hold duration",
@@ -110,7 +102,10 @@ return {
         ["Макс. дистанция TP"] = "Max TP distance",
         ["Клавиша Click TP"] = "Click TP key",
         ["Suicide (мгновенная смерть)"] = "Suicide",
-        ["Freeze Character"] = "Freeze Character",
+        ["Бездействие до включения (сек)"] = "Idle time before enabling (sec)",
+        ["Считать за активность: клики мыши"] = "Count as activity: mouse clicks",
+        ["Считать за активность: клавиатура"] = "Count as activity: keyboard",
+        ["Считать за активность: движение мыши"] = "Count as activity: mouse movement",
 
         -- ===== AIM =====
         ["Клавиша аимбота"] = "Aimbot key",
@@ -169,14 +164,35 @@ return {
         ["Прозрачность меню"] = "Menu transparency",
         ["Отключить предупреждения"] = "Disable warnings",
         ["Фоновая проверка античита"] = "Background anti-cheat scan",
+        ["Язык"] = "Language",
 
-        -- ===== бинды (RU-подписи) =====
-        ["Визуалы"] = "Visuals",
+        -- ===== бинды =====
+        ["Visuals"] = "Visuals",
+        ["Speed Hack"] = "Speed Hack",
+        ["Flight"] = "Flight",
+        ["Noclip"] = "Noclip",
+        ["Aimbot"] = "Aimbot",
+        ["Triggerbot"] = "Triggerbot",
+        ["Auto Clicker"] = "Auto Clicker",
+        ["Третье лицо"] = "Third person",
         ["Курсор"] = "Cursor",
-        ["БХоп"] = "BHop",
-        ["Фриз"] = "Freeze",
+        ["BHop"] = "BHop",
+        ["Freeze"] = "Freeze",
+        ["Click TP"] = "Click TP",
         ["Клик ТП"] = "Click TP",
+
+        -- ===== misc =====
+        ["Rainbow"] = "Rainbow",
+        ["Head Dot"] = "Head Dot",
+        ["ESP Outline"] = "ESP Outline",
+        ["Anti-AFK"] = "Anti-AFK",
+        ["Smart Anti-AFK"] = "Smart Anti-AFK",
+        ["Auto Clicker"] = "Auto Clicker",
+        ["BHop (Bunny Hop)"] = "BHop (Bunny Hop)",
+        ["Click TP (телепорт в точку клика)"] = "Click TP (teleport to click)",
+        ["Freeze Character"] = "Freeze Character",
     },
 
-    ru = {},
+    ru = {
+    },
 }

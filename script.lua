@@ -47,14 +47,7 @@ do
             end,
             t = function(s, ...)
                 if type(s) ~= "string" then return s end
-                if current == "ru" then
-                    if select("#", ...) > 0 then
-                        local ok, r = pcall(string.format, s, ...)
-                        if ok then return r end
-                    end
-                    return s
-                end
-                local langDict = dict[current] or dict.en or {}
+                local langDict = dict[current] or {}
                 local translated = langDict[s] or s
                 if select("#", ...) > 0 then
                     local ok, r = pcall(string.format, translated, ...)
@@ -82,7 +75,6 @@ do
         }
     end
 end
-
 local savedLang = getgenv().BOBRCHEATS_LANG
 if type(savedLang) == "string" then
     Locales.set(savedLang)
