@@ -586,6 +586,36 @@ local Settings = {
     ESP_HealthTextSize = 12,
     ESP_HealthTextColor = Color3.fromRGB(255, 100, 100),
 
+    -- === Exunys-style additions ===
+    ESP_HeadDot = false,
+    ESP_HeadDotColor = Color3.fromRGB(255, 255, 255),
+    ESP_HeadDotOutline = true,
+    ESP_HeadDotOutlineColor = Color3.fromRGB(0, 0, 0),
+    ESP_HeadDotThickness = 1,
+    ESP_HeadDotNumSides = 30,
+    ESP_HeadDotFilled = false,
+    ESP_HeadDotRadiusMode = "Auto",
+    ESP_HeadDotFixedRadius = 5,
+
+    ESP_Rainbow = false,
+    ESP_RainbowOutline = false,
+    ESP_RainbowSpeed = 1,
+
+    ESP_TracerPosition = 1,
+    ESP_HealthBarPosition = 3,
+    ESP_HealthBarBlue = 0,
+
+    ESP_OutlineMaster = true,
+    ESP_BoxOutline = true,
+    ESP_BoxOutlineColor = Color3.fromRGB(0, 0, 0),
+    ESP_BoxOutlineThickness = 2,
+    ESP_TracerOutline = false,
+    ESP_TracerOutlineColor = Color3.fromRGB(0, 0, 0),
+    ESP_TracerOutlineThickness = 2,
+    ESP_HealthBarOutline = false,
+    ESP_HealthBarOutlineColor = Color3.fromRGB(0, 0, 0),
+
+
     ESP_NPCs = false,
     ESP_NPC_Names = false,
     ESP_NPC_HealthMode = "Bar",
@@ -605,6 +635,16 @@ local Settings = {
     ESP_NPC_HealthBarWidth = 4,
     ESP_NPC_HealthBarOffset = 4,
     ESP_NPC_DistanceSize = 12,
+    ESP_NPC_TracerPosition = 1,
+    ESP_NPC_HealthBarPosition = 3,
+    ESP_NPC_FrozenDetection = false,
+    ESP_NPC_FrozenColor = Color3.fromRGB(120, 120, 120),
+    ESP_NPC_FrozenQuickTime = 3,
+    ESP_NPC_FrozenSlowTime = 30,
+    ESP_NPC_FrozenMoveThreshold = 0.1,
+    ESP_NPC_Skeleton = false,
+    ESP_NPC_SkeletonColor = Color3.fromRGB(255, 150, 0),
+    ESP_NPC_SkeletonThickness = 1.5,
 
     ESP_BoxColor = Color3.fromRGB(255, 50, 50),
     ESP_TracerColor = Color3.fromRGB(255, 255, 255),
@@ -788,21 +828,27 @@ task.wait(1)
 -- контейнер для нашего GUI
 local SafeParent
 do
-    local target = LocalPlayer:WaitForChild("PlayerGui")
+    local guiParent = CoreGui
+    pcall(function()
+        if gethui then guiParent = gethui() end
+    end)
 
-    local existing = target:FindFirstChild("_bobr_container")
+    local existing = guiParent:FindFirstChild("_bobr_container")
     if existing then existing:Destroy() end
 
     local container = Instance.new("Folder")
     container.Name = "_bobr_container"
-    container.Parent = target
+    container.Parent = guiParent
     SafeParent = container
 end
+
 
 
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "_load"
 LoadingGui.ResetOnSpawn = false
+LoadingGui.DisplayOrder = 2147483646
+LoadingGui.IgnoreGuiInset = true
 LoadingGui.Parent = SafeParent
 
 local LoadingFrame = Instance.new("Frame")
@@ -876,6 +922,8 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "_menu"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 2147483647
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = SafeParent
 ScreenGui.Enabled = false
 
@@ -1928,28 +1976,55 @@ CreateSection(espPage)
 ToggleRefs.ESP_Enabled = CreateFunctionRow(espPage, "ESP Вкл/Выкл", Settings.ESP_Enabled,
     function(v) Settings.ESP_Enabled = v end,
     function(panel)
+        -- rainbow
         CreateSection(panel)
-        CreateColorPicker(panel, "Цвет рамок", Settings.ESP_BoxColor, function(c) Settings.ESP_BoxColor=c end)
-        CreateColorPicker(panel, "Цвет линий", Settings.ESP_TracerColor, function(c) Settings.ESP_TracerColor=c end)
-        CreateColorPicker(panel, "Цвет имён", Settings.ESP_NameColor, function(c) Settings.ESP_NameColor=c end)
-        CreateColorPicker(panel, "Цвет дистанции", Settings.ESP_DistanceColor, function(c) Settings.ESP_DistanceColor=c end)
-        CreateSection(panel)
-        CreateSliderInt(panel, "Толщина рамок", 1, 5, Settings.ESP_BoxThickness, function(v) Settings.ESP_BoxThickness=v end)
-        CreateSliderInt(panel, "Толщина линий", 1, 3, Settings.ESP_TracerThickness, function(v) Settings.ESP_TracerThickness=v end)
-        CreateSliderInt(panel, "Размер имён", 10, 20, Settings.ESP_NameSize, function(v) Settings.ESP_NameSize=v end)
-        CreateSliderInt(panel, "Ширина HP Bar", 1, 10, Settings.ESP_HealthBarWidth, function(v) Settings.ESP_HealthBarWidth=v end)
-        CreateSliderInt(panel, "Отступ HP Bar", 0, 10, Settings.ESP_HealthBarOffset, function(v) Settings.ESP_HealthBarOffset=v end)
-        CreateSliderInt(panel, "Размер HP Text", 10, 20, Settings.ESP_HealthTextSize, function(v) Settings.ESP_HealthTextSize=v end)
-        CreateSliderInt(panel, "Размер дистанции", 10, 20, Settings.ESP_DistanceSize, function(v) Settings.ESP_DistanceSize=v end)
+        CreateToggle(panel, "Rainbow", function(v) Settings.ESP_Rainbow = v end, Settings.ESP_Rainbow)
+        CreateSlider(panel, "Rainbow Speed (higher = slower)", 0.2, 5, Settings.ESP_RainbowSpeed, function(v) Settings.ESP_RainbowSpeed = v end, 2)
+
+        -- skeleton
         CreateSection(panel)
         CreateToggle(panel, "Skeleton ESP", function(v) Settings.ESP_Skeleton = v end, Settings.ESP_Skeleton)
-        CreateSlider(panel, "Толщина скелета", 0.5, 4, Settings.ESP_SkeletonThickness, function(v) Settings.ESP_SkeletonThickness = v end, 1)
         CreateColorPicker(panel, "Цвет скелета", Settings.ESP_SkeletonColor, function(c) Settings.ESP_SkeletonColor = c end)
+        CreateSlider(panel, "Толщина скелета", 0.5, 4, Settings.ESP_SkeletonThickness, function(v) Settings.ESP_SkeletonThickness = v end, 1)
+
+        -- limit
         CreateSection(panel)
         CreateToggle(panel, "Ограничить дистанцию ESP", function(v) Settings.ESP_LimitDistance = v end, Settings.ESP_LimitDistance)
-        CreateSliderInt(panel, "Макс. дистанция (m)", 100, 10000, Settings.ESP_MaxDistance, function(v) Settings.ESP_MaxDistance=v end)
-    end)
+        CreateSliderInt(panel, "Макс. дистанция (m)", 100, 10000, Settings.ESP_MaxDistance, function(v) Settings.ESP_MaxDistance = v end)
 
+        -- позиции
+        CreateSection(panel)
+        CreateModeSwitch(panel, "Tracer Position", {"Bottom","Center","Mouse"}, "Bottom",
+            function(v)
+                if v == "Bottom" then Settings.ESP_TracerPosition = 1
+                elseif v == "Center" then Settings.ESP_TracerPosition = 2
+                else Settings.ESP_TracerPosition = 3 end
+            end)
+        CreateModeSwitch(panel, "Health Bar Position", {"Top","Bottom","Left","Right"}, "Left",
+            function(v)
+                if v == "Top" then Settings.ESP_HealthBarPosition = 1
+                elseif v == "Bottom" then Settings.ESP_HealthBarPosition = 2
+                elseif v == "Left" then Settings.ESP_HealthBarPosition = 3
+                else Settings.ESP_HealthBarPosition = 4 end
+            end)
+
+        -- цвета
+        CreateSection(panel)
+        CreateColorPicker(panel, "Цвет рамок", Settings.ESP_BoxColor, function(c) Settings.ESP_BoxColor = c end)
+        CreateColorPicker(panel, "Цвет линий", Settings.ESP_TracerColor, function(c) Settings.ESP_TracerColor = c end)
+        CreateColorPicker(panel, "Цвет имён", Settings.ESP_NameColor, function(c) Settings.ESP_NameColor = c end)
+        CreateColorPicker(panel, "Цвет дистанции", Settings.ESP_DistanceColor, function(c) Settings.ESP_DistanceColor = c end)
+
+        -- ползунки
+        CreateSection(panel)
+        CreateSliderInt(panel, "Толщина рамок", 1, 5, Settings.ESP_BoxThickness, function(v) Settings.ESP_BoxThickness = v end)
+        CreateSliderInt(panel, "Толщина линий", 1, 3, Settings.ESP_TracerThickness, function(v) Settings.ESP_TracerThickness = v end)
+        CreateSliderInt(panel, "Размер имён", 10, 20, Settings.ESP_NameSize, function(v) Settings.ESP_NameSize = v end)
+        CreateSliderInt(panel, "Ширина HP Bar", 1, 10, Settings.ESP_HealthBarWidth, function(v) Settings.ESP_HealthBarWidth = v end)
+        CreateSliderInt(panel, "Отступ HP Bar", 0, 10, Settings.ESP_HealthBarOffset, function(v) Settings.ESP_HealthBarOffset = v end)
+        CreateSliderInt(panel, "Размер HP Text", 10, 20, Settings.ESP_HealthTextSize, function(v) Settings.ESP_HealthTextSize = v end)
+        CreateSliderInt(panel, "Размер дистанции", 10, 20, Settings.ESP_DistanceSize, function(v) Settings.ESP_DistanceSize = v end)
+    end)
 CreateToggle(espPage, "Только враги", function(v) Settings.ESP_TeamCheck=v end, Settings.ESP_TeamCheck)
 CreateToggle(espPage, "Рамки", function(v) Settings.ESP_Boxes=v end, Settings.ESP_Boxes)
 CreateToggle(espPage, "Линии", function(v) Settings.ESP_Tracers=v end, Settings.ESP_Tracers)
@@ -1957,6 +2032,32 @@ CreateToggle(espPage, "Имена", function(v) Settings.ESP_Names=v end, Settin
 CreateModeSwitch(espPage, "Здоровье", {"Bar","Text","Off"}, Settings.ESP_HealthMode, function(v) Settings.ESP_HealthMode=v end)
 CreateToggle(espPage, "Дистанция", function(v) Settings.ESP_Distance=v end, Settings.ESP_Distance)
 CreateToggle(espPage, "Проверка видимости", function(v) Settings.ESP_VisibilityCheck=v end, Settings.ESP_VisibilityCheck)
+CreateFunctionRow(espPage, "Head Dot", Settings.ESP_HeadDot,
+    function(v) Settings.ESP_HeadDot = v end,
+    function(panel)
+        CreateSection(panel)
+        CreateToggle(panel, "Outline", function(v) Settings.ESP_HeadDotOutline = v end, Settings.ESP_HeadDotOutline)
+        CreateColorPicker(panel, "Color", Settings.ESP_HeadDotColor, function(c) Settings.ESP_HeadDotColor = c end)
+        CreateColorPicker(panel, "Outline Color", Settings.ESP_HeadDotOutlineColor, function(c) Settings.ESP_HeadDotOutlineColor = c end)
+        CreateSection(panel)
+        CreateSliderInt(panel, "Thickness", 1, 5, Settings.ESP_HeadDotThickness, function(v) Settings.ESP_HeadDotThickness = v end)
+        CreateSliderInt(panel, "Sides", 6, 60, Settings.ESP_HeadDotNumSides, function(v) Settings.ESP_HeadDotNumSides = v end)
+        CreateModeSwitch(panel, "Radius", {"Auto","Fixed"}, Settings.ESP_HeadDotRadiusMode, function(v) Settings.ESP_HeadDotRadiusMode = v end)
+        CreateSliderInt(panel, "Fixed Radius", 1, 20, Settings.ESP_HeadDotFixedRadius, function(v) Settings.ESP_HeadDotFixedRadius = v end)
+        CreateToggle(panel, "Filled", function(v) Settings.ESP_HeadDotFilled = v end, Settings.ESP_HeadDotFilled)
+    end)
+
+
+CreateFunctionRow(espPage, "ESP Outline", Settings.ESP_OutlineMaster,
+    function(v) Settings.ESP_OutlineMaster = v end,
+    function(panel)
+        CreateSection(panel)
+        CreateToggle(panel, "Box Outline", function(v) Settings.ESP_BoxOutline = v end, Settings.ESP_BoxOutline)
+        CreateColorPicker(panel, "Box Outline Color", Settings.ESP_BoxOutlineColor, function(c) Settings.ESP_BoxOutlineColor = c end)
+        CreateSlider(panel, "Box Outline Width", 0, 8, Settings.ESP_BoxOutlineThickness, function(v) Settings.ESP_BoxOutlineThickness = v end, 2)
+        CreateSection(panel)
+        CreateSliderInt(panel, "Health Bar Blue Channel", 0, 255, Settings.ESP_HealthBarBlue, function(v) Settings.ESP_HealthBarBlue = v end)
+    end)
 CreateToggle(espPage, "Цвета команд", function(v) Settings.ESP_TeamColors=v end, Settings.ESP_TeamColors)
 
 CreateSection(espPage)
@@ -1979,12 +2080,48 @@ CreateSection(npcPage)
 CreateFunctionRow(npcPage, "ESP на NPC", Settings.ESP_NPCs,
     function(v) Settings.ESP_NPCs = v end,
     function(panel)
+        -- skeleton
+        CreateSection(panel)
+        CreateToggle(panel, "Skeleton NPC", function(v) Settings.ESP_NPC_Skeleton = v end, Settings.ESP_NPC_Skeleton)
+        CreateColorPicker(panel, "Цвет скелета NPC", Settings.ESP_NPC_SkeletonColor, function(c) Settings.ESP_NPC_SkeletonColor = c end)
+        CreateSlider(panel, "Толщина скелета NPC", 0.5, 4, Settings.ESP_NPC_SkeletonThickness, function(v) Settings.ESP_NPC_SkeletonThickness = v end, 1)
+
+        -- frozen detection
+        CreateSection(panel)
+        CreateToggle(panel, "Frozen Detection", function(v)
+            Settings.ESP_NPC_FrozenDetection = v
+            if not v then
+                for m, _ in pairs(npcFrozenState) do npcFrozenState[m] = nil end
+            end
+        end, Settings.ESP_NPC_FrozenDetection)
+        CreateColorPicker(panel, "Цвет заморозки", Settings.ESP_NPC_FrozenColor, function(c) Settings.ESP_NPC_FrozenColor = c end)
+        CreateSliderInt(panel, "Быстрый порог (не двигался) сек", 1, 60, Settings.ESP_NPC_FrozenQuickTime, function(v) Settings.ESP_NPC_FrozenQuickTime = v end)
+        CreateSliderInt(panel, "Медленный порог (двигался) сек", 5, 300, Settings.ESP_NPC_FrozenSlowTime, function(v) Settings.ESP_NPC_FrozenSlowTime = v end)
+
+        -- позиции
+        CreateSection(panel)
+        CreateModeSwitch(panel, "Tracer Position", {"Bottom","Center","Mouse"}, "Bottom",
+            function(v)
+                if v == "Bottom" then Settings.ESP_NPC_TracerPosition = 1
+                elseif v == "Center" then Settings.ESP_NPC_TracerPosition = 2
+                else Settings.ESP_NPC_TracerPosition = 3 end
+            end)
+        CreateModeSwitch(panel, "Health Bar Position", {"Top","Bottom","Left","Right"}, "Left",
+            function(v)
+                if v == "Top" then Settings.ESP_NPC_HealthBarPosition = 1
+                elseif v == "Bottom" then Settings.ESP_NPC_HealthBarPosition = 2
+                elseif v == "Left" then Settings.ESP_NPC_HealthBarPosition = 3
+                else Settings.ESP_NPC_HealthBarPosition = 4 end
+            end)
+
+        -- цвета
         CreateSection(panel)
         CreateColorPicker(panel, "Цвет рамок", Settings.NPC_BoxColor, function(c) Settings.NPC_BoxColor=c end)
         CreateColorPicker(panel, "Цвет имён", Settings.NPC_NameColor, function(c) Settings.NPC_NameColor=c end)
         CreateColorPicker(panel, "Цвет линий", Settings.NPC_TracerColor, function(c) Settings.NPC_TracerColor=c end)
+
+        -- ползунки
         CreateSection(panel)
-        CreateToggle(panel, "Свои размеры для NPC", function(v) Settings.ESP_NPC_CustomSizes = v end, Settings.ESP_NPC_CustomSizes)
         CreateSliderInt(panel, "Толщина рамок", 1, 5, Settings.ESP_NPC_BoxThickness, function(v) Settings.ESP_NPC_BoxThickness=v end)
         CreateSliderInt(panel, "Размер имён", 10, 20, Settings.ESP_NPC_NameSize, function(v) Settings.ESP_NPC_NameSize=v end)
         CreateSliderInt(panel, "Ширина HP Bar", 1, 10, Settings.ESP_NPC_HealthBarWidth, function(v) Settings.ESP_NPC_HealthBarWidth=v end)
@@ -2818,14 +2955,6 @@ function RefreshTPTab()
     RefreshSavedLocations()
 end
 
-Players.PlayerAdded:Connect(function() if currentTabIndex == 7 then RefreshTPTab() end end)
-Players.PlayerRemoving:Connect(function(plr)
-    FavoritePlayers[plr] = nil
-    if ESPBoxes[plr] then RemoveFullESP(ESPBoxes[plr]); ESPBoxes[plr] = nil end
-    removeChamsForPlayer(plr)
-    Trail.ClearPlayer(plr)
-    if currentTabIndex == 7 then RefreshTPTab() end
-end)
 
 -- настройки (вкладка)
 local setPage = TabPages[9]
@@ -3342,6 +3471,7 @@ end
 
 -- ESP
 local ESPBoxes, NPC_ESP = {}, {}
+local npcFrozenState = {}
 
 local SKELETON_BONES = {
     {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
@@ -3358,12 +3488,30 @@ local SKELETON_BONES = {
 function CreateFullESP()
     if not DrawingAvailable then return {} end
     local esp = {}
+
+    -- контуры
+    pcall(function() esp.BoxOutline = Drawing.new("Square"); esp.BoxOutline.Visible = false; esp.BoxOutline.Filled = false end)
+    pcall(function() esp.TracerOutline = Drawing.new("Line"); esp.TracerOutline.Visible = false end)
+    pcall(function()
+        esp.HeadDotOutline = Drawing.new("Circle")
+        esp.HeadDotOutline.Visible = false
+        esp.HeadDotOutline.NumSides = Settings.ESP_HeadDotNumSides
+        esp.HeadDotOutline.Filled = false
+    end)
+
+    -- основное
     pcall(function() esp.Box = Drawing.new("Square"); esp.Box.Visible = false; esp.Box.Filled = false end)
     pcall(function() esp.Tracer = Drawing.new("Line"); esp.Tracer.Visible = false end)
     pcall(function() esp.Name = Drawing.new("Text"); esp.Name.Visible = false; esp.Name.Center = true; esp.Name.Outline = true end)
     pcall(function() esp.HealthBar = Drawing.new("Line"); esp.HealthBar.Visible = false end)
     pcall(function() esp.HealthText = Drawing.new("Text"); esp.HealthText.Visible = false; esp.HealthText.Center = true; esp.HealthText.Outline = true end)
     pcall(function() esp.Distance = Drawing.new("Text"); esp.Distance.Visible = false; esp.Distance.Center = true; esp.Distance.Outline = true end)
+    pcall(function()
+        esp.HeadDot = Drawing.new("Circle")
+        esp.HeadDot.Visible = false
+        esp.HeadDot.NumSides = Settings.ESP_HeadDotNumSides
+    end)
+
     esp.Skeleton = {}
     for _ = 1, #SKELETON_BONES do
         local line
@@ -3381,6 +3529,11 @@ function RemoveFullESP(esp)
     pcall(function() if esp.HealthBar then esp.HealthBar:Remove() end end)
     pcall(function() if esp.HealthText then esp.HealthText:Remove() end end)
     pcall(function() if esp.Distance then esp.Distance:Remove() end end)
+    pcall(function() if esp.BoxOutline then esp.BoxOutline:Remove() end end)
+    pcall(function() if esp.TracerOutline then esp.TracerOutline:Remove() end end)
+    pcall(function() if esp.HealthBarOutline then esp.HealthBarOutline:Remove() end end)
+    pcall(function() if esp.HeadDot then esp.HeadDot:Remove() end end)
+    pcall(function() if esp.HeadDotOutline then esp.HeadDotOutline:Remove() end end)
     if esp.Skeleton then
         for _, line in ipairs(esp.Skeleton) do pcall(function() line:Remove() end) end
     end
@@ -3551,6 +3704,7 @@ Players.PlayerRemoving:Connect(function(plr)
     removeChamsForPlayer(plr)
     FavoritePlayers[plr] = nil
     Trail.ClearPlayer(plr)
+    if currentTabIndex == 7 then RefreshTPTab() end
 end)
 
 local highlightDrawings = {}; local itemObjects = {}; local lastHighlightUpdate = 0
@@ -4418,6 +4572,41 @@ function UpdateFPSPingDisplay()
     fpsText.Text = text
     fpsText.Visible = (Settings.ShowFPS or Settings.ShowPing)
 end
+
+local function GetESPColor(baseColor, teamColorOverride)
+    if Settings.ESP_Rainbow then
+        local s = math.max(0.1, Settings.ESP_RainbowSpeed)
+        return Color3.fromHSV((tick() % s) / s, 1, 1)
+    end
+    if Settings.ESP_TeamColors and teamColorOverride then
+        return teamColorOverride
+    end
+    return baseColor
+end
+
+local function GetESPOutlineColor(fallback)
+    return fallback
+end
+
+local function HidePlayerESP(esp)
+    if not esp then return end
+    if esp.Box then pcall(function() esp.Box.Visible = false end) end
+    if esp.Tracer then pcall(function() esp.Tracer.Visible = false end) end
+    if esp.Name then pcall(function() esp.Name.Visible = false end) end
+    if esp.HealthBar then pcall(function() esp.HealthBar.Visible = false end) end
+    if esp.HealthText then pcall(function() esp.HealthText.Visible = false end) end
+    if esp.Distance then pcall(function() esp.Distance.Visible = false end) end
+    if esp.BoxOutline then pcall(function() esp.BoxOutline.Visible = false end) end
+    if esp.TracerOutline then pcall(function() esp.TracerOutline.Visible = false end) end
+    if esp.HealthBarOutline then pcall(function() esp.HealthBarOutline.Visible = false end) end
+    if esp.HeadDot then pcall(function() esp.HeadDot.Visible = false end) end
+    if esp.HeadDotOutline then pcall(function() esp.HeadDotOutline.Visible = false end) end
+    if esp.Skeleton then
+        for _, line in ipairs(esp.Skeleton) do pcall(function() line.Visible = false end) end
+    end
+end
+
+
 function IsEnemy(player)
     if not Settings.ESP_TeamCheck then return true end
     local myTeam = LocalPlayer.Team; local plrTeam = player.Team; if not myTeam or not plrTeam then return true end
@@ -4449,10 +4638,28 @@ savedMouseBehavior = nil
 function FormatHPText(hum)
     return tostring(math.floor(hum.Health)) .. " HP"
 end
-local mainRenderConnection
+
+
 mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
     local ___ok, ___err = pcall(function()
     if not MenuLoaded then return end
+    do
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 then
+                local wantSpeed
+                if Settings.Flight_Enabled then
+                    wantSpeed = 0
+                elseif Settings.Speed_Enabled then
+                    wantSpeed = math.min(Settings.Speed_Value, MAX_SAFE_SPEED)
+                end
+                if wantSpeed and hum.WalkSpeed ~= wantSpeed then
+                    hum.WalkSpeed = wantSpeed
+                end
+            end
+        end
+    end
     if CustomCursor and CustomCursor.Visible then
         local mousePos = UserInputService:GetMouseLocation()
         CustomCursor.Position = UDim2.new(0, mousePos.X, 0, mousePos.Y)
@@ -4553,44 +4760,28 @@ mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
                 passDistance = (lc.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude <= Settings.ESP_MaxDistance
             end
             if not IsEnemy(plr) or not char or not passDistance then
-                pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                HidePlayerESP(esp)
             else
                 local hum = char:FindFirstChild("Humanoid"); if not hum or hum.Health <= 0 then
-                    pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                    pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                    pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                    if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                HidePlayerESP(esp)
                 else
                     local head = char:FindFirstChild("Head")
                     if not head then
-                        pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                        pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                        pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                        if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                HidePlayerESP(esp)
                     else
                         if Settings.ESP_VisibilityCheck and not IsVisible(head) then
-                            pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                            pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                            pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                            if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                HidePlayerESP(esp)
                         else
                             local top = head.Position + Vector3.new(0, head.Size.Y/2, 0)
                             local root = char:FindFirstChild("HumanoidRootPart")
                             local bot = root and (root.Position - Vector3.new(0, hum.HipHeight, 0))
                             if not root or not bot then
-                                pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                                pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                                pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
+                                HidePlayerESP(esp)
                             else
                                 local sTop, vTop = Camera:WorldToViewportPoint(top)
                                 local sBot, vBot = Camera:WorldToViewportPoint(bot)
                                 if not vTop or not vBot then
-                                    pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                                    pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                                    pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
+                                    HidePlayerESP(esp)
                                 else
                                     local boxTop, boxBot = sTop.Y, sBot.Y
                                     local boxH = math.abs(boxBot - boxTop)
@@ -4598,19 +4789,104 @@ mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
                                     local boxLeft = sTop.X - boxW/2
                                     local viewport = Camera.ViewportSize
                                     if boxLeft > viewport.X or (boxLeft + boxW) < 0 or boxTop > viewport.Y or (boxBot) < 0 then
-                                        pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                                        pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                                        pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                                        if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                                        HidePlayerESP(esp)
                                     else
                                         local hpPct = hum.Health / hum.MaxHealth
                                         pcall(function()
+                                            local tc
+                                            pcall(function() tc = plr.TeamColor and plr.TeamColor.Color end)
+                                            local boxColor = GetESPColor(Settings.ESP_BoxColor, tc)
+
                                             if Settings.ESP_Boxes then
-                                                esp.Box.Visible = true; esp.Box.Position = Vector2.new(boxLeft, boxTop); esp.Box.Size = Vector2.new(boxW, boxH)
-                                                local c = Settings.ESP_BoxColor
-                                                if Settings.ESP_TeamColors then local tc; pcall(function() tc = plr.TeamColor and plr.TeamColor.Color end); if tc then c = tc end end
-                                                esp.Box.Color = c; esp.Box.Thickness = Settings.ESP_BoxThickness
-                                            else esp.Box.Visible = false end
+                                                local outlineOn = Settings.ESP_OutlineMaster and Settings.ESP_BoxOutline
+                                                if outlineOn and esp.BoxOutline then
+                                                    local ot = Settings.ESP_BoxOutlineThickness or 1.5
+                                                    esp.BoxOutline.Visible = true
+                                                    esp.BoxOutline.Position = Vector2.new(boxLeft - ot / 2, boxTop - ot / 2)
+                                                    esp.BoxOutline.Size = Vector2.new(boxW + ot, boxH + ot)
+                                                    esp.BoxOutline.Color = GetESPOutlineColor(Settings.ESP_BoxOutlineColor)
+                                                    esp.BoxOutline.Thickness = ot
+                                                elseif esp.BoxOutline then
+                                                    esp.BoxOutline.Visible = false
+                                                end
+                                                esp.Box.Visible = true
+                                                esp.Box.Position = Vector2.new(boxLeft, boxTop)
+                                                esp.Box.Size = Vector2.new(boxW, boxH)
+                                                esp.Box.Color = boxColor
+                                                esp.Box.Thickness = Settings.ESP_BoxThickness
+                                                esp.Box.Outline = false
+                                            else
+                                                esp.Box.Visible = false
+                                                if esp.BoxOutline then esp.BoxOutline.Visible = false end
+                                            end
+                                        end)
+                                        pcall(function()
+                                            local tc
+                                            pcall(function() tc = plr.TeamColor and plr.TeamColor.Color end)
+                                            local tracerColor = GetESPColor(Settings.ESP_TracerColor, tc)
+                                            if Settings.ESP_Tracers then
+                                                local fromPos
+                                                if Settings.ESP_TracerPosition == 2 then
+                                                    fromPos = Vector2.new(viewport.X / 2, viewport.Y / 2)
+                                                elseif Settings.ESP_TracerPosition == 3 then
+                                                    fromPos = UserInputService:GetMouseLocation()
+                                                else
+                                                    fromPos = Vector2.new(viewport.X / 2, viewport.Y)
+                                                end
+                                                local toPos = Vector2.new(sTop.X, boxBot)
+                                                esp.Tracer.Visible = true
+                                                esp.Tracer.From = fromPos
+                                                esp.Tracer.To = toPos
+                                                esp.Tracer.Color = tracerColor
+                                                esp.Tracer.Thickness = Settings.ESP_TracerThickness
+                                            else
+                                                esp.Tracer.Visible = false
+                                            end
+                                        end)
+
+                                        --  HeadDot
+                                        pcall(function()
+                                            if Settings.ESP_HeadDot and head then
+                                                local hs, hv = Camera:WorldToViewportPoint(head.Position)
+                                                if hv then
+                                                    local tc
+                                                    pcall(function() tc = plr.TeamColor and plr.TeamColor.Color end)
+                                                    local dotColor = GetESPColor(Settings.ESP_HeadDotColor, tc)
+
+                                                    local radius
+                                                    if Settings.ESP_HeadDotRadiusMode == "Fixed" then
+                                                        radius = Settings.ESP_HeadDotFixedRadius
+                                                    else
+                                                        radius = math.max(3, math.abs(sTop.Y - sBot.Y) * 0.15)
+                                                    end
+
+                                                    esp.HeadDot.Visible = true
+                                                    esp.HeadDot.Position = Vector2.new(hs.X, hs.Y)
+                                                    esp.HeadDot.Radius = radius
+                                                    esp.HeadDot.Color = dotColor
+                                                    esp.HeadDot.Thickness = Settings.ESP_HeadDotThickness
+                                                    esp.HeadDot.NumSides = Settings.ESP_HeadDotNumSides
+                                                    esp.HeadDot.Filled = Settings.ESP_HeadDotFilled
+
+                                                    if Settings.ESP_OutlineMaster and Settings.ESP_HeadDotOutline then
+                                                        local oc = GetESPOutlineColor(Settings.ESP_HeadDotOutlineColor)
+                                                        esp.HeadDotOutline.Visible = true
+                                                        esp.HeadDotOutline.Position = Vector2.new(hs.X, hs.Y)
+                                                        esp.HeadDotOutline.Radius = radius + 1
+                                                        esp.HeadDotOutline.Color = oc
+                                                        esp.HeadDotOutline.Thickness = Settings.ESP_HeadDotThickness + 1
+                                                        esp.HeadDotOutline.NumSides = Settings.ESP_HeadDotNumSides
+                                                    else
+                                                        esp.HeadDotOutline.Visible = false
+                                                    end
+                                                else
+                                                    esp.HeadDot.Visible = false
+                                                    esp.HeadDotOutline.Visible = false
+                                                end
+                                            else
+                                                esp.HeadDot.Visible = false
+                                                esp.HeadDotOutline.Visible = false
+                                            end
                                         end)
                                         pcall(function()
                                             if Settings.ESP_Distance and lc and lc:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
@@ -4651,32 +4927,64 @@ mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
                                             end
                                         end
                                         pcall(function()
-                                            if Settings.ESP_Tracers then
-                                                esp.Tracer.Visible = true; esp.Tracer.From = Vector2.new(viewport.X/2, viewport.Y); esp.Tracer.To = Vector2.new(sTop.X, boxBot)
-                                                esp.Tracer.Color = Settings.ESP_TracerColor; esp.Tracer.Thickness = Settings.ESP_TracerThickness
-                                            else esp.Tracer.Visible = false end
-                                        end)
-                                        pcall(function()
                                             if Settings.ESP_Names then
                                                 esp.Name.Visible = true; esp.Name.Position = Vector2.new(sTop.X, boxTop - 16); esp.Name.Text = plr.DisplayName
                                                 esp.Name.Size = Settings.ESP_NameSize; esp.Name.Color = Settings.ESP_NameColor
                                             else esp.Name.Visible = false end
                                         end)
+
                                         pcall(function()
                                             if Settings.ESP_HealthMode == "Bar" then
-                                                local barX = boxLeft - Settings.ESP_HealthBarWidth - Settings.ESP_HealthBarOffset
-                                                local healthY = boxBot + (boxTop - boxBot) * hpPct
-                                                local color = hpPct > 0.5 and Color3.new(1 - (hpPct-0.5)*2, 1, 0) or Color3.new(1, hpPct*2, 0)
-                                                esp.HealthBar.Visible = true; esp.HealthBar.From = Vector2.new(barX, boxBot); esp.HealthBar.To = Vector2.new(barX, healthY)
-                                                esp.HealthBar.Color = color; esp.HealthBar.Thickness = Settings.ESP_HealthBarWidth
+                                                local barThick = Settings.ESP_HealthBarWidth
+                                                local offset   = Settings.ESP_HealthBarOffset
+                                                local blue     = Settings.ESP_HealthBarBlue or 0
+                                                local hc = Color3.fromRGB(
+                                                    math.floor(255 - hpPct * 255),
+                                                    math.floor(hpPct * 255),
+                                                    blue
+                                                )
+
+                                                local fromV, toV, outFrom, outTo
+                                                if Settings.ESP_HealthBarPosition == 1 then
+                                                    local y = boxTop - offset - barThick / 2
+                                                    fromV = Vector2.new(boxLeft, y)
+                                                    toV   = Vector2.new(boxLeft + boxW * hpPct, y)
+                                                    outFrom = Vector2.new(boxLeft - 1, y)
+                                                    outTo   = Vector2.new(boxLeft + boxW + 1, y)
+                                                elseif Settings.ESP_HealthBarPosition == 2 then
+                                                    local y = boxBot + offset + barThick / 2
+                                                    fromV = Vector2.new(boxLeft, y)
+                                                    toV   = Vector2.new(boxLeft + boxW * hpPct, y)
+                                                    outFrom = Vector2.new(boxLeft - 1, y)
+                                                    outTo   = Vector2.new(boxLeft + boxW + 1, y)
+                                                elseif Settings.ESP_HealthBarPosition == 4 then
+                                                    local x = boxLeft + boxW + offset + barThick / 2
+                                                    fromV = Vector2.new(x, boxBot)
+                                                    toV   = Vector2.new(x, boxBot + (boxTop - boxBot) * hpPct)
+                                                    outFrom = Vector2.new(x, boxBot - 1)
+                                                    outTo   = Vector2.new(x, boxTop + 1)
+                                                else
+                                                    local x = boxLeft - offset - barThick / 2
+                                                    fromV = Vector2.new(x, boxBot)
+                                                    toV   = Vector2.new(x, boxBot + (boxTop - boxBot) * hpPct)
+                                                    outFrom = Vector2.new(x, boxBot - 1)
+                                                    outTo   = Vector2.new(x, boxTop + 1)
+                                                end
+
+                                                esp.HealthBar.Visible = true
+                                                esp.HealthBar.From = fromV
+                                                esp.HealthBar.To = toV
+                                                esp.HealthBar.Color = hc
+                                                esp.HealthBar.Thickness = barThick
                                                 esp.HealthText.Visible = false
-                                            elseif Settings.ESP_HealthMode == "Text" then
+                                                elseif Settings.ESP_HealthMode == "Text" then
                                                 esp.HealthText.Visible = true; esp.HealthText.Position = Vector2.new(sTop.X, boxBot + 4)
 
 esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_HealthTextSize; esp.HealthText.Color = Settings.ESP_HealthTextColor
                                                 esp.HealthBar.Visible = false
                                             else
-                                                esp.HealthBar.Visible = false; esp.HealthText.Visible = false
+                                                esp.HealthBar.Visible = false
+                                                esp.HealthText.Visible = false
                                             end
                                         end)
                                         pcall(function()
@@ -4697,10 +5005,7 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
         else
         if not Settings.ESP_Enabled then
             for _, esp in pairs(ESPBoxes) do
-                pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
-                pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
-                pcall(function() esp.HealthText.Visible = false end); pcall(function() esp.Distance.Visible = false end)
-                if esp.Skeleton then for _, line in ipairs(esp.Skeleton) do line.Visible = false end end
+                HidePlayerESP(esp)
             end
         end
     end
@@ -4713,6 +5018,11 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                 if not NPC_ESP[model] then NPC_ESP[model] = CreateFullESP() end
                 local esp = NPC_ESP[model]
                 if not esp then continue end
+                if esp.Skeleton then
+                    for _, line in ipairs(esp.Skeleton) do
+                        if line.Visible then line.Visible = false end
+                    end
+                end
                 local hum = model:FindFirstChild("Humanoid")
                 local health = hum and hum.Health or 100
                 if hum and health > 0 or not hum then
@@ -4720,6 +5030,32 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                     if model.PrimaryPart then pos = model.PrimaryPart.Position
                     else pcall(function() pos = model:GetPivot().Position end) end
                     local dist = (lc and lc:FindFirstChild("HumanoidRootPart") and (lc.HumanoidRootPart.Position - pos).Magnitude) or 0
+                    local isNpcFrozen = false
+                    if Settings.ESP_NPC_FrozenDetection then
+                        local state = npcFrozenState[model]
+                        if not state then
+                            state = {
+                                lastPos = pos,
+                                lastMoveTime = tick(),
+                                everMoved = false,
+                            }
+                            npcFrozenState[model] = state
+                        end
+
+                        local moved = (pos - state.lastPos).Magnitude > (Settings.ESP_NPC_FrozenMoveThreshold or 0.1)
+                        if moved then
+                            state.lastPos = pos
+                            state.lastMoveTime = tick()
+                            state.everMoved = true
+                        end
+
+                        local idleTime = tick() - state.lastMoveTime
+                        local requiredTime = state.everMoved
+                            and (Settings.ESP_NPC_FrozenSlowTime or 30)
+                            or (Settings.ESP_NPC_FrozenQuickTime or 3)
+
+                        isNpcFrozen = idleTime >= requiredTime
+                    end
                     if dist <= Settings.ESP_NPC_MaxDistance then
                         local head = model:FindFirstChild("Head")
                         local top, bot
@@ -4731,12 +5067,12 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                             bot = model.PrimaryPart.Position - Vector3.new(0, 2, 0)
                         end
                         if top and bot and (not Settings.ESP_VisibilityCheck or IsVisible(head or model.PrimaryPart)) then
-                            local szBoxThick     = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_BoxThickness or Settings.ESP_BoxThickness
-                            local szNameSize     = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_NameSize or Settings.ESP_NameSize
-                            local szHealthBarW   = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_HealthBarWidth or Settings.ESP_HealthBarWidth
-                            local szHealthBarOff = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_HealthBarOffset or Settings.ESP_HealthBarOffset
-                            local szHealthTextSz = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_HealthTextSize or Settings.ESP_HealthTextSize
-                            local szDistanceSz   = Settings.ESP_NPC_CustomSizes and Settings.ESP_NPC_DistanceSize or Settings.ESP_DistanceSize
+                            local szBoxThick     = Settings.ESP_NPC_BoxThickness
+                            local szNameSize     = Settings.ESP_NPC_NameSize
+                            local szHealthBarW   = Settings.ESP_NPC_HealthBarWidth
+                            local szHealthBarOff = Settings.ESP_NPC_HealthBarOffset
+                            local szHealthTextSz = Settings.ESP_NPC_HealthTextSize
+                            local szDistanceSz   = Settings.ESP_NPC_DistanceSize
                             local sTop, vTop = Camera:WorldToViewportPoint(top); local sBot, vBot = Camera:WorldToViewportPoint(bot)
 
                             if vTop and vBot then
@@ -4744,32 +5080,60 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                                 local boxH = math.abs(boxBot - boxTop); local boxW = boxH * 0.4; local boxLeft = sTop.X - boxW/2
                                 local viewport = Camera.ViewportSize
                                 if not (boxLeft > viewport.X or (boxLeft + boxW) < 0 or boxTop > viewport.Y or boxBot < 0) then
-                                    pcall(function() esp.Box.Visible = true; esp.Box.Position = Vector2.new(boxLeft, boxTop); esp.Box.Size = Vector2.new(boxW, boxH); esp.Box.Color = Settings.NPC_BoxColor; esp.Box.Thickness = szBoxThick end)
+                                    local npcBoxColor = Settings.NPC_BoxColor
+                                    if Settings.ESP_NPC_FrozenDetection and isNpcFrozen then
+                                        npcBoxColor = Settings.ESP_NPC_FrozenColor
+                                    end
+                                    pcall(function() esp.Box.Visible = true; esp.Box.Position = Vector2.new(boxLeft, boxTop); esp.Box.Size = Vector2.new(boxW, boxH); esp.Box.Color = npcBoxColor; esp.Box.Thickness = szBoxThick end)
 
-                                    pcall(function() if Settings.ESP_NPC_Tracers then esp.Tracer.Visible = true; esp.Tracer.From = Vector2.new(viewport.X/2, viewport.Y); esp.Tracer.To = Vector2.new(sTop.X, boxBot); esp.Tracer.Color = Settings.NPC_TracerColor; esp.Tracer.Thickness = Settings.ESP_TracerThickness else esp.Tracer.Visible = false end end)
+pcall(function()
+    if Settings.ESP_NPC_Tracers then
+        local fromPos
+        if Settings.ESP_NPC_TracerPosition == 2 then
+            fromPos = Vector2.new(viewport.X/2, viewport.Y/2)
+        elseif Settings.ESP_NPC_TracerPosition == 3 then
+            fromPos = UserInputService:GetMouseLocation()
+        else
+            fromPos = Vector2.new(viewport.X/2, viewport.Y)
+        end
+        esp.Tracer.Visible = true
+        esp.Tracer.From = fromPos
+        esp.Tracer.To = Vector2.new(sTop.X, boxBot)
+        esp.Tracer.Color = Settings.NPC_TracerColor
+        esp.Tracer.Thickness = Settings.ESP_TracerThickness
+    else
+        esp.Tracer.Visible = false
+    end
+end)
                                     pcall(function() if Settings.ESP_NPC_Names then esp.Name.Visible = true; esp.Name.Position = Vector2.new(sTop.X, boxTop - 16); esp.Name.Text = data.Name; esp.Name.Size = szNameSize; esp.Name.Color = Settings.NPC_NameColor else esp.Name.Visible = false end end)
                                     pcall(function()          
                                         local npcMaxHp = (hum and hum.MaxHealth) or 100
                                         local hpPct = math.clamp(health / npcMaxHp, 0, 1)
                                         if Settings.ESP_NPC_HealthMode == "Bar" then
-                                            local barX = boxLeft - szHealthBarW - szHealthBarOff
-                                            local healthY = boxBot + (boxTop - boxBot) * hpPct
+                                            local fromV, toV
+                                            if Settings.ESP_NPC_HealthBarPosition == 1 then
+                                                local y = boxTop - szHealthBarOff - szHealthBarW / 2
+                                                fromV = Vector2.new(boxLeft, y)
+                                                toV   = Vector2.new(boxLeft + boxW * hpPct, y)
+                                            elseif Settings.ESP_NPC_HealthBarPosition == 2 then
+                                                local y = boxBot + szHealthBarOff + szHealthBarW / 2
+                                                fromV = Vector2.new(boxLeft, y)
+                                                toV   = Vector2.new(boxLeft + boxW * hpPct, y)
+                                            elseif Settings.ESP_NPC_HealthBarPosition == 4 then
+                                                local x = boxLeft + boxW + szHealthBarOff + szHealthBarW / 2
+                                                fromV = Vector2.new(x, boxBot)
+                                                toV   = Vector2.new(x, boxBot + (boxTop - boxBot) * hpPct)
+                                            else
+                                                local x = boxLeft - szHealthBarOff - szHealthBarW / 2
+                                                fromV = Vector2.new(x, boxBot)
+                                                toV   = Vector2.new(x, boxBot + (boxTop - boxBot) * hpPct)
+                                            end
                                             local color = hpPct > 0.5 and Color3.new(1 - (hpPct-0.5)*2, 1, 0) or Color3.new(1, hpPct*2, 0)
                                             esp.HealthBar.Visible = true
-                                            esp.HealthBar.From = Vector2.new(barX, boxBot)
-                                            esp.HealthBar.To = Vector2.new(barX, healthY)
+                                            esp.HealthBar.From = fromV
+                                            esp.HealthBar.To = toV
                                             esp.HealthBar.Color = color
                                             esp.HealthBar.Thickness = szHealthBarW
-                                            esp.HealthText.Visible = false
-                                        elseif Settings.ESP_NPC_HealthMode == "Text" then
-                                            esp.HealthText.Visible = true
-                                            esp.HealthText.Position = Vector2.new(sTop.X, boxBot + 4)
-                                            esp.HealthText.Text = tostring(math.floor(health)) .. " HP"
-                                            esp.HealthText.Size = szHealthTextSz
-                                            esp.HealthText.Color = Settings.ESP_HealthTextColor
-                                            esp.HealthBar.Visible = false
-                                        else
-                                            esp.HealthBar.Visible = false
                                             esp.HealthText.Visible = false
                                         end
                                     end)
@@ -4785,6 +5149,31 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                                             esp.Distance.Visible = false
                                         end
                                     end)
+
+                                    if esp.Skeleton then
+                                        if Settings.ESP_NPC_Skeleton then
+                                            local partCache = {}
+                                            for _, part in ipairs(model:GetChildren()) do
+                                                if part:IsA("BasePart") then partCache[part.Name] = part end
+                                            end
+                                            for i, bone in ipairs(SKELETON_BONES) do
+                                                local a = partCache[bone[1]]
+                                                local b = partCache[bone[2]]
+                                                local line = esp.Skeleton[i]
+                                                if line and a and b then
+                                                    local s1, v1 = Camera:WorldToViewportPoint(a.Position)
+                                                    local s2, v2 = Camera:WorldToViewportPoint(b.Position)
+                                                    if v1 and v2 then
+                                                        line.From = Vector2.new(s1.X, s1.Y)
+                                                        line.To = Vector2.new(s2.X, s2.Y)
+                                                        line.Color = Settings.ESP_NPC_SkeletonColor
+                                                        line.Thickness = Settings.ESP_NPC_SkeletonThickness
+                                                        line.Visible = true
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
                                 else
                                     pcall(function() esp.Box.Visible = false end); pcall(function() esp.Tracer.Visible = false end)
                                     pcall(function() esp.Name.Visible = false end); pcall(function() esp.HealthBar.Visible = false end)
@@ -4808,8 +5197,9 @@ esp.HealthText.Text = FormatHPText(hum); esp.HealthText.Size = Settings.ESP_Heal
                 else
                     RemoveFullESP(esp); NPC_ESP[model] = nil
                 end
-            else
+                        else
                 if NPC_ESP[model] then RemoveFullESP(NPC_ESP[model]); NPC_ESP[model] = nil end
+                npcFrozenState[model] = nil
             end
         end
     else
@@ -5167,13 +5557,22 @@ task.spawn(function()
 end)
 
  -- обработка игрока
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    UpdateFlight(); UpdateSpeed()
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid", 5)
+    task.wait(0.3)
+    UpdateSpeed()
+    UpdateFlight()
     if Settings.Noclip_Enabled then UpdateNoclip() end
     if Settings.AntiAFK_Enabled then UpdateAntiAFK() end
     if Settings.AutoClicker_Enabled then SetAutoClickerEnabled(true) end
     if Settings.Freeze_Enabled then UpdateFreeze() end
+    -- переприменяем ещё раз через секунду, чтобы перебить игровой сброс
+    task.delay(1.0, function()
+        if char == LocalPlayer.Character then
+            UpdateSpeed()
+            UpdateFlight()
+        end
+    end)
 end)
 
 -- тп по клику
@@ -5264,6 +5663,10 @@ function FULL_UNLOAD()
     if FullCleanupDone then return end
     FullCleanupDone = true
 
+    pcall(function()
+        local CAS = game:GetService("ContextActionService")
+        CAS:UnbindAction("BobrEscapeToggle")
+    end)
 
     getgenv().BOBRCHEATS_ACTIVE = false
     scriptActive = false
@@ -5662,6 +6065,44 @@ task.spawn(function()
     LoadingGui:Destroy()
     ShowMainMenu()
     print(Locales.t("[bobrcheats v22.8] Меню загружено."))
+end)
+
+local ContextActionService = game:GetService("ContextActionService")
+
+local function BobrEscape(actionName, inputState, inputObject)
+    if inputState ~= Enum.UserInputState.Begin then
+        return Enum.ContextActionResult.Pass
+    end
+
+    if Settings.CursorUnlock_Enabled then
+        Settings.CursorUnlock_Enabled = false
+        if ToggleRefs.CursorUnlock then ToggleRefs.CursorUnlock.SetState(false) end
+        pcall(function() UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter end)
+        CustomCursor.Visible = false
+    else
+        Settings.CursorUnlock_Enabled = true
+        if ToggleRefs.CursorUnlock then ToggleRefs.CursorUnlock.SetState(true) end
+        if not savedMouseBehavior then
+            savedMouseBehavior = UserInputService.MouseBehavior
+        end
+        pcall(function() UserInputService.MouseBehavior = Enum.MouseBehavior.Default end)
+        CustomCursor.Visible = true
+        if MenuLoaded and ScreenGui and not ScreenGui.Enabled then
+            ShowMainMenu()
+        end
+    end
+
+    return Enum.ContextActionResult.Sink
+end
+
+pcall(function()
+    ContextActionService:BindActionAtPriority(
+        "BobrEscapeToggle",
+        BobrEscape,
+        false,
+        4000,
+        Enum.KeyCode.Escape
+    )
 end)
 
 print(Locales.t("[bobrcheats v22.8] Загрузка..."))

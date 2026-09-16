@@ -1,21 +1,17 @@
 -- locales.lua — словарь переводов для bobrcheats
+-- RU-режим: возвращает строку как есть (пасс-сру).
+-- EN-режим:  смотрит в dict.en[русский_ключ] → английский.
+-- Технические термины (Chams, Aimbot, Flight и т.д.) НЕ переводятся.
 return {
     en = {
-        -- загрузка / выгрузка
-        ["Обнаружен предыдущий запуск! Выгружаем старый экземпляр..."] = "Previous instance detected! Unloading it...",
-        ["[bobrcheats v22.8] Загрузка..."] = "[bobrcheats v22.8] Loading...",
-        ["[bobrcheats v22.8] Меню загружено."] = "[bobrcheats v22.8] Menu loaded.",
-        ["[bobrcheats] выгрузка завершена"] = "[bobrcheats] unload complete",
-
-        -- античит
+        -- ===== загрузка / античит =====
         ["Сканирование..."] = "Scanning...",
-        [" Античит не обнаружен"] = " Anti-cheat not found",
         ["✅ Античит не обнаружен"] = "✅ Anti-cheat not found",
         ["⚠ Обнаружено подозрительных объектов: "] = "⚠ Suspicious objects found: ",
         ["⚠ Подозрительные объекты: "] = "⚠ Suspicious objects: ",
         ["Запуск глубокой проверки..."] = "Starting deep scan...",
-        ["Окончание..."] = "Finishing up...",
         ["Проверка: "] = "Scanning: ",
+        ["Окончание..."] = "Finishing up...",
         ["⏹ Проверка остановлена"] = "⏹ Scan stopped",
         ["Глубокая проверка: Запуск..."] = "Deep scan: starting...",
         ["Глубокая проверка: Сканирование..."] = "Deep scan: scanning...",
@@ -29,7 +25,6 @@ return {
         ["Ошибка быстрого детектора:"] = "Quick detector error:",
         ["Быстрый детектор: "] = "Quick scan: ",
         ["Быстрый детектор завершён. Результат: "] = "Quick scan complete. Result: ",
-        ["Проверка остановлена"] = "Scan stopped",
         ["Глубокая проверка"] = "Deep scan",
         ["Остановка..."] = "Stopping...",
         ["Остановка"] = "Stop",
@@ -39,14 +34,16 @@ return {
         ["[bobrcheats] Фоновая проверка завершена: "] = "[bobrcheats] Background scan complete: ",
         ["[bobrcheats] Быстрый детектор: "] = "[bobrcheats] Quick scan: ",
         ["[bobrcheats] Быстрый детектор завершён. Результат: "] = "[bobrcheats] Quick scan complete. Result: ",
+        ["Обнаружен предыдущий запуск! Выгружаем старый экземпляр..."] = "Previous instance detected! Unloading it...",
+        ["[bobrcheats v22.8] Загрузка..."] = "[bobrcheats v22.8] Loading...",
+        ["[bobrcheats v22.8] Меню загружено."] = "[bobrcheats v22.8] Menu loaded.",
+        ["[bobrcheats] ПОЛНАЯ ВЫГРУЗКА ЗАВЕРШЕНА"] = "[bobrcheats] FULL UNLOAD COMPLETE",
 
-        -- диалоги
+        -- ===== диалоги =====
         ["⚠ ВНИМАНИЕ"] = "⚠ WARNING",
         ["⚠ ТЕЛЕПОРТ"] = "⚠ TELEPORT",
         ["Да"] = "Yes",
         ["Нет"] = "No",
-        ["Глубокая проверка может вызвать лаги или кратковременное зависание Roblox. Продолжить?"] = "The deep scan may cause lag or briefly freeze Roblox. Continue?",
-        ["Вы отключаете все предупреждения о риске бана. Продолжить?"] = "You're about to disable all ban-risk warnings. Continue?",
         ["Speed Hack может вызвать кик или бан. Включить?"] = "Speed Hack can get you kicked or banned. Enable it?",
         ["Полёт может быть обнаружен античитом. Включить?"] = "Flight can be detected by anti-cheat. Enable it?",
         ["Noclip может вызвать кик или бан. Включить?"] = "Noclip can get you kicked or banned. Enable it?",
@@ -54,9 +51,11 @@ return {
         ["BHop может быть обнаружен античитом. Включить?"] = "BHop can be detected by anti-cheat. Enable it?",
         ["Авто-наводка делает аим заметным. Включить?"] = "Auto-Aim makes your aim look suspicious. Enable it?",
         ["Вы уверены, что хотите убить своего персонажа?"] = "Are you sure you want to kill your character?",
+        ["Глубокая проверка может вызвать лаги или кратковременное зависание Roblox. Продолжить?"] = "The deep scan may cause lag or briefly freeze Roblox. Continue?",
+        ["Вы отключаете все предупреждения о риске бана. Продолжить?"] = "You're about to disable all ban-risk warnings. Continue?",
         ["Телепорт может вызвать кик. Продолжить?"] = "Teleporting may get you kicked. Continue?",
 
-        -- ESP
+        -- ===== ESP (главная вкладка) =====
         ["ESP Вкл/Выкл"] = "ESP On/Off",
         ["Только враги"] = "Enemies only",
         ["Рамки"] = "Boxes",
@@ -66,11 +65,6 @@ return {
         ["Дистанция"] = "Distance",
         ["Проверка видимости"] = "Visibility check",
         ["Цвета команд"] = "Team colors",
-        ["Chams"] = "Chams",
-        ["Яркость Chams"] = "Chams brightness",
-        ["Trails (путь)"] = "Trails",
-        ["Толщина линии"] = "Line thickness",
-        ["Макс. точек"] = "Max points",
         ["Цвет рамок"] = "Box color",
         ["Цвет линий"] = "Tracer color",
         ["Цвет имён"] = "Name color",
@@ -82,55 +76,43 @@ return {
         ["Отступ HP Bar"] = "HP bar offset",
         ["Размер HP Text"] = "HP text size",
         ["Размер дистанции"] = "Distance size",
-        ["Skeleton ESP"] = "Skeleton ESP",
         ["Толщина скелета"] = "Skeleton thickness",
         ["Цвет скелета"] = "Skeleton color",
         ["Ограничить дистанцию ESP"] = "Limit ESP distance",
         ["Макс. дистанция (m)"] = "Max distance (m)",
+        ["Яркость Chams"] = "Chams brightness",
+        ["Trails (путь)"] = "Trails",
+        ["Толщина линии"] = "Line thickness",
+        ["Макс. точек"] = "Max points",
 
-        -- NPC
+        -- ===== NPC =====
         ["ESP на NPC"] = "ESP on NPCs",
+        ["Свои размеры для NPC"] = "Custom NPC sizes",
         ["Имена NPC"] = "NPC names",
         ["Здоровье NPC"] = "NPC health",
         ["Линии к NPC"] = "NPC tracers",
         ["Дистанция NPC"] = "NPC distance",
         ["Макс. дистанция"] = "Max distance",
-        ["Свои размеры для NPC"] = "Custom NPC sizes",
-        ["Chams NPC"] = "NPC Chams",
         ["Яркость Chams NPC"] = "NPC Chams brightness",
 
-        -- MOVE
-        ["Speed Hack"] = "Speed Hack",
+        -- ===== MOVE =====
         ["Скорость бега"] = "Walk speed",
-        ["Flight"] = "Flight",
         ["Скорость полёта"] = "Flight speed",
-        ["Noclip"] = "Noclip",
-        ["God Mode"] = "God Mode",
-        ["Anti-AFK"] = "Anti-AFK",
         ["Интервал (сек)"] = "Interval (sec)",
         ["Длит. шага (сек)"] = "Step duration (sec)",
-        ["Smart Anti-AFK"] = "Smart Anti-AFK",
-        ["Бездействие до включения (сек)"] = "Idle time before enabling (sec)",
-        ["Считать за активность: клики мыши"] = "Count as activity: mouse clicks",
-        ["Считать за активность: клавиатура"] = "Count as activity: keyboard",
-        ["Считать за активность: движение мыши"] = "Count as activity: mouse movement",
-        ["BHop (Bunny Hop)"] = "BHop (Bunny Hop)",
+        ["Пауза Anti-AFK"] = "Pause Anti-AFK",
         ["Задержка прыжка"] = "Jump delay",
-        ["Auto Clicker"] = "Auto Clicker",
         ["Задержка между кликами"] = "Delay between clicks",
         ["Время нажатия"] = "Hold duration",
         ["Разблокировать курсор"] = "Unlock cursor",
-        ["Freeze Character"] = "Freeze character",
         ["Изменить гравитацию"] = "Change gravity",
         ["Значение"] = "Value",
-        ["Click TP (телепорт в точку клика)"] = "Click TP",
         ["Макс. дистанция TP"] = "Max TP distance",
         ["Клавиша Click TP"] = "Click TP key",
         ["Suicide (мгновенная смерть)"] = "Suicide",
+        ["Freeze Character"] = "Freeze Character",
 
-        -- AIM
-        ["Aimbot"] = "Aimbot",
-        ["Auto Aim"] = "Auto-Aim",
+        -- ===== AIM =====
         ["Клавиша аимбота"] = "Aimbot key",
         ["Часть тела"] = "Target part",
         ["Игнорировать игроков при проверке стен"] = "Ignore players in wall check",
@@ -140,21 +122,16 @@ return {
         ["Задержка реакции"] = "Reaction delay",
         ["Задержка (сек)"] = "Delay (sec)",
         ["Плавность"] = "Smoothness",
-        ["Team Check"] = "Team check",
         ["Проверка стен"] = "Wall check",
         ["Реалистичная наводка"] = "Realistic aim",
-        ["Triggerbot"] = "Triggerbot",
         ["Режим"] = "Mode",
         ["Задержка между выстрелами (сек)"] = "Delay between shots (sec)",
         ["Проверка невидимости"] = "Visibility check",
         ["Триггер на NPC"] = "Trigger on NPCs",
 
-        -- VISUAL
-        ["Fullbright"] = "Fullbright",
+        -- ===== VISUAL =====
         ["Яркость"] = "Brightness",
-        ["FOV Changer"] = "FOV Changer",
         ["Картофель"] = "Potato graphics",
-        ["Atmosphere Remover"] = "Atmosphere Remover",
         ["Третье лицо"] = "Third person",
         ["Кастомный прицел"] = "Custom crosshair",
         ["Длина лучей"] = "Crosshair length",
@@ -162,38 +139,43 @@ return {
         ["Отступ от центра"] = "Gap from center",
         ["Точка в центре"] = "Center dot",
         ["Размер точки"] = "Dot size",
-        ["T-стиль (скрыть верх)"] = "T-style",
+        ["T-стиль (скрыть верх)"] = "T-style (hide top)",
         ["Обводка"] = "Outline",
         ["Толщина обводки"] = "Outline thickness",
         ["Цвет обводки"] = "Outline color",
         ["Цвет прицела"] = "Crosshair color",
 
-        -- ITEMS
+        -- ===== ITEMS =====
         ["Подсветка предметов"] = "Item highlight",
         ["Размер текста"] = "Text size",
         ["Цвет"] = "Color",
         ["Названия"] = "Names",
         ["Только интерактивные"] = "Interactive only",
 
-        -- TP
+        -- ===== TP =====
         ["Сохранить позицию"] = "Save position",
         ["ТП к последней сохр."] = "TP to last saved",
         ["ТП на спавн"] = "TP to spawn",
         ["Очистить все сохр."] = "Clear all saved",
 
-        -- SPEC
+        -- ===== SPEC =====
         ["⛔ Остановить"] = "⛔ Stop",
         ["ТП к цели"] = "TP to target",
 
-        -- SETTINGS
+        -- ===== SETTINGS =====
         ["Показывать FPS"] = "Show FPS",
         ["Показывать пинг"] = "Show ping",
         ["Кнопки игроков в цвет команды"] = "Team-colored player buttons",
         ["Прозрачность меню"] = "Menu transparency",
         ["Отключить предупреждения"] = "Disable warnings",
         ["Фоновая проверка античита"] = "Background anti-cheat scan",
+
+        -- ===== бинды (RU-подписи) =====
+        ["Визуалы"] = "Visuals",
         ["Курсор"] = "Cursor",
-        ["Язык"] = "Language",
+        ["БХоп"] = "BHop",
+        ["Фриз"] = "Freeze",
+        ["Клик ТП"] = "Click TP",
     },
 
     ru = {},
