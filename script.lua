@@ -1,4 +1,4 @@
--- bobrcheats v22.8 
+-- bobrcheats v23.0 
 -- Xeno Executor
 
 -- локализация: загружаем словарь из GitHub
@@ -975,7 +975,7 @@ local TitleText = Instance.new("TextLabel")
 TitleText.Size = UDim2.new(1, -60, 1, 0)
 TitleText.Position = UDim2.new(0, 16, 0, 0)
 TitleText.BackgroundTransparency = 1
-TitleText.Text = "bobrcheats v22.8"
+TitleText.Text = "bobrcheats v23.0"
 TitleText.TextColor3 = Settings.AccentColor
 TitleText.Font = Enum.Font.GothamBold
 TitleText.TextSize = 18
@@ -6064,7 +6064,7 @@ task.spawn(function()
     task.wait(0.5)
     LoadingGui:Destroy()
     ShowMainMenu()
-    print(Locales.t("[bobrcheats v22.8] Меню загружено."))
+    print(Locales.t("[bobrcheats v23.0] Меню загружено."))
 end)
 
 local ContextActionService = game:GetService("ContextActionService")
@@ -6105,4 +6105,4 @@ pcall(function()
     )
 end)
 
-print(Locales.t("[bobrcheats v22.8] Загрузка..."))
+print(Locales.t("[bobrcheats v23.0] Загрузка..."))
