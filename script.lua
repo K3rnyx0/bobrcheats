@@ -1,4 +1,4 @@
--- bobrcheats v23.0 
+-- bobrcheats v23.1 
 -- Xeno Executor
 
 -- локализация: загружаем словарь из GitHub
@@ -118,13 +118,6 @@ pcall(function()
 end)
 pcall(function()
     if gethui then
-        local h = gethui()
-        if h:FindFirstChild("_menu") then h._menu:Destroy() end
-        if h:FindFirstChild("_load") then h._load:Destroy() end
-    end
-end)
-pcall(function()
-    if gethui then
         local ok, h = pcall(gethui)
         if ok and h then
             if h:FindFirstChild("_menu") then h._menu:Destroy() end
@@ -146,6 +139,7 @@ local VIM
 pcall(function() VIM = game:GetService("VirtualInputManager") end)
 local CoreGui = game:GetService("CoreGui")
 local DefaultFOV = Camera.FieldOfView
+local RAYCAST_EXCLUDE = Enum.RaycastFilterType.Exclude or Enum.RaycastFilterType.Blacklist
 
 -- объявляем заранее
 local AntiCheatResult, antiCheatStatusLabel
@@ -424,7 +418,6 @@ function DeepDetectAntiCheat()
     end
 
 print(Locales.t("Глубокая проверка: Сканирование..."))
-    local lastPrintedPercent = -1
     for _, cont in ipairs(containers) do
         local cname, inst = cont[1], cont[2]
         if inst and not DeepCheckCancelled then
@@ -783,6 +776,7 @@ local Settings = {
 
 local FavoritePlayers = {}
 local npcCacheData = {}
+local npcFrozenState = {}
 
 function ToggleFavorite(player)
     if FavoritePlayers[player] then FavoritePlayers[player] = nil
@@ -950,6 +944,7 @@ MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+-- Флаг: курсор находится над меню
 
 -- Пульсирующая рамка
 local UIStroke = Instance.new("UIStroke")
@@ -975,7 +970,7 @@ local TitleText = Instance.new("TextLabel")
 TitleText.Size = UDim2.new(1, -60, 1, 0)
 TitleText.Position = UDim2.new(0, 16, 0, 0)
 TitleText.BackgroundTransparency = 1
-TitleText.Text = "bobrcheats v23.0"
+TitleText.Text = "bobrcheats v23.1"
 TitleText.TextColor3 = Settings.AccentColor
 TitleText.Font = Enum.Font.GothamBold
 TitleText.TextSize = 18
@@ -1868,75 +1863,6 @@ function CreateFunctionRow(parent, text, defaultVal, onToggle, buildFn, warning)
     return { SetState = setState, gearBtn = gearBtn }
 end
 
-local ButtonSetColors = setmetatable({}, {__mode = "k"})
-
-function CreateButton(parent, text, onClick, color)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 30)
-    btn.BackgroundColor3 = color or Color3.fromRGB(40, 40, 40)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 12
-    btn.AutoButtonColor = false
-    btn.Parent = parent
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
-
-    local baseColor = color or Color3.fromRGB(40, 40, 40)
-
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, tweenInfo, {BackgroundColor3 = baseColor:Lerp(Color3.new(1,1,1), 0.15)}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, tweenInfo, {BackgroundColor3 = baseColor}):Play()
-    end)
-    btn.MouseButton1Click:Connect(onClick)
-
-    ButtonSetColors[btn] = function(c)
-        baseColor = c
-        btn.BackgroundColor3 = c
-    end
-
-    return btn
-end
--- цвет по команде
-
-function GetTeamButtonColor(plr)
-    if not Settings.TP_TeamColorButtons then
-        return Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
-    end
-    if not plr or not plr.TeamColor then
-        return Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
-    end
-    local c = plr.TeamColor.Color
-    local r, g, b = math.floor(c.R * 255), math.floor(c.G * 255), math.floor(c.B * 255)
-    if math.abs(r - g) < 20 and math.abs(g - b) < 20 and math.abs(r - b) < 20 then
-        return Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
-    end
-    local lum = 0.299 * c.R + 0.587 * c.G + 0.114 * c.B
-    if lum > 0.55 then
-        return c, Color3.fromRGB(20, 20, 20)
-    end
-    return c, Color3.fromRGB(255, 255, 255)
-end
-
--- обёртки для локализации
-local _CreateToggle = CreateToggle
-CreateToggle = function(parent, text, cb, default, warning)
-    return _CreateToggle(parent, Locales.t(text), cb, default,
-        warning and Locales.t(warning) or nil)
-end
-
-local _CreateFunctionRow = CreateFunctionRow
-CreateFunctionRow = function(parent, text, defaultVal, onToggle, buildFn, warning)
-    return _CreateFunctionRow(parent, Locales.t(text), defaultVal, onToggle,
-        buildFn, warning and Locales.t(warning) or nil)
-end
-
-local _CreateButton = CreateButton
-CreateButton = function(parent, text, onClick, color)
-    return _CreateButton(parent, Locales.t(text), onClick, color)
-end
 
 local _CreateSlider = CreateSlider
 CreateSlider = function(parent, text, min, max, default, cb, precision)
@@ -2088,12 +2014,12 @@ CreateFunctionRow(npcPage, "ESP на NPC", Settings.ESP_NPCs,
 
         -- frozen detection
         CreateSection(panel)
-        CreateToggle(panel, "Frozen Detection", function(v)
-            Settings.ESP_NPC_FrozenDetection = v
-            if not v then
-                for m, _ in pairs(npcFrozenState) do npcFrozenState[m] = nil end
-            end
-        end, Settings.ESP_NPC_FrozenDetection)
+CreateToggle(panel, "Frozen Detection", function(v)
+    Settings.ESP_NPC_FrozenDetection = v
+    if not v and npcFrozenState then
+        for m in pairs(npcFrozenState) do npcFrozenState[m] = nil end
+    end
+end, Settings.ESP_NPC_FrozenDetection)
         CreateColorPicker(panel, "Цвет заморозки", Settings.ESP_NPC_FrozenColor, function(c) Settings.ESP_NPC_FrozenColor = c end)
         CreateSliderInt(panel, "Быстрый порог (не двигался) сек", 1, 60, Settings.ESP_NPC_FrozenQuickTime, function(v) Settings.ESP_NPC_FrozenQuickTime = v end)
         CreateSliderInt(panel, "Медленный порог (двигался) сек", 5, 300, Settings.ESP_NPC_FrozenSlowTime, function(v) Settings.ESP_NPC_FrozenSlowTime = v end)
@@ -2517,11 +2443,14 @@ function RefreshSpectateFavOnly()
         frame.Parent = specFavFrame
 
         local isActive = Settings.Spectating and not Settings.SpectateIsNPC and Settings.SpectateTarget == player
-        local bgc, txtc
+        local bgc, txtc = Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
         if isActive then
             bgc, txtc = Color3.fromRGB(100, 200, 100), Color3.fromRGB(20, 20, 20)
         else
-            bgc, txtc = GetTeamButtonColor(player)
+            if type(GetTeamButtonColor) == "function" then
+                local ok, a, b = pcall(GetTeamButtonColor, player)
+                if ok and typeof(a) == "Color3" then bgc, txtc = a, b end
+            end
         end
 
         local btn = Instance.new("TextButton")
@@ -2575,11 +2504,14 @@ function RefreshSpectatePlayersOnly()
         frame.Parent = specListFrame
 
         local isActive = Settings.Spectating and not Settings.SpectateIsNPC and Settings.SpectateTarget == player
-        local bgc, txtc
+        local bgc, txtc = Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
         if isActive then
             bgc, txtc = Color3.fromRGB(100, 200, 100), Color3.fromRGB(20, 20, 20)
         else
-            bgc, txtc = GetTeamButtonColor(player)
+            if type(GetTeamButtonColor) == "function" then
+                local ok, a, b = pcall(GetTeamButtonColor, player)
+                if ok and typeof(a) == "Color3" then bgc, txtc = a, b end
+            end
         end
 
         local btn = Instance.new("TextButton")
@@ -2652,7 +2584,11 @@ function UpdateSpectateHighlight()
             btn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
             btn.TextColor3 = Color3.fromRGB(20, 20, 20)
         else
-            local bgc, txtc = GetTeamButtonColor(player)
+local bgc, txtc = Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
+if type(GetTeamButtonColor) == "function" then
+    local ok, a, b = pcall(GetTeamButtonColor, player)
+    if ok and typeof(a) == "Color3" then bgc, txtc = a, b end
+end
             btn.BackgroundColor3 = bgc
             btn.TextColor3 = txtc
         end
@@ -2850,7 +2786,11 @@ function RefreshFavorites()
             dist = " ("..math.floor((char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude).."m)"
         end
         local frame = Instance.new("Frame") frame.Size=UDim2.new(1,0,0,28) frame.BackgroundTransparency=1 frame.Parent=favListFrame
-        local bgc, txtc = GetTeamButtonColor(player)
+local bgc, txtc = Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
+if type(GetTeamButtonColor) == "function" then
+    local ok, a, b = pcall(GetTeamButtonColor, player)
+    if ok and typeof(a) == "Color3" then bgc, txtc = a, b end
+end
         local btn = Instance.new("TextButton") btn.Size=UDim2.new(1,-30,1,0) btn.Position=UDim2.new(0,0,0,0) btn.BackgroundColor3=bgc btn.Text="★ "..player.DisplayName.." (@"..player.Name..")"..dist btn.TextColor3=txtc btn.Font=Enum.Font.Gotham btn.TextSize=12 btn.Parent=frame
         local removeBtn = Instance.new("TextButton") removeBtn.Size=UDim2.new(0,24,0,24) removeBtn.Position=UDim2.new(1,-26,0,2) removeBtn.BackgroundColor3=Color3.fromRGB(200,40,40) removeBtn.Text="X" removeBtn.TextColor3=Color3.fromRGB(255,255,255) removeBtn.Font=Enum.Font.GothamBold removeBtn.TextSize=13 removeBtn.Parent=frame
         local plrRef = player
@@ -2880,7 +2820,11 @@ function RefreshPlayerList()
             dist = " ("..math.floor((char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude).."m)"
         end
         local frame = Instance.new("Frame") frame.Size=UDim2.new(1,0,0,28) frame.BackgroundTransparency=1 frame.Parent=playerListFrame
-        local bgc, txtc = GetTeamButtonColor(player)
+local bgc, txtc = Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255)
+if type(GetTeamButtonColor) == "function" then
+    local ok, a, b = pcall(GetTeamButtonColor, player)
+    if ok and typeof(a) == "Color3" then bgc, txtc = a, b end
+end
         local btn = Instance.new("TextButton") btn.Size=UDim2.new(1,-30,1,0) btn.Position=UDim2.new(0,0,0,0) btn.BackgroundColor3=bgc btn.Text=player.DisplayName.." (@"..player.Name..")"..dist btn.TextColor3=txtc btn.Font=Enum.Font.Gotham btn.TextSize=12 btn.Parent=frame
         local plrRef = player
         btn.MouseButton1Click:Connect(function()
@@ -3129,7 +3073,7 @@ if res.Found then
     UpdateSpeed()
     UpdateFlight()
     UpdateNoclip()
-    SetAutoClickerEnabled(false)
+    SetAutoClickerEnabled(false, true)
             end
         end)
     end)
@@ -3449,15 +3393,38 @@ end
 -- автокликер
 local autoClickerConnection, autoClickerLastClick = nil, 0
 local lastAutoClickerEnableTime = 0
+local AUTO_CLICKER_LOCK_TIME = 1.0
 
-function SetAutoClickerEnabled(val)
+local function IsMouseOverMenu()
+    if not MainFrame or not MainFrame.Visible then return false end
+    local mp = UserInputService:GetMouseLocation()
+    local fp = MainFrame.AbsolutePosition
+    local fs = MainFrame.AbsoluteSize
+    if fs.X <= 0 or fs.Y <= 0 then return false end  -- меню свёрнуто/не готово
+
+    -- Разница координатных систем (topbar). Проверяем 3 варианта Y.
+    local inset = 0
+    pcall(function()
+        inset = game:GetService("GuiService"):GetGuiInset().Y
+    end)
+
+    local inX = (mp.X >= fp.X) and (mp.X <= fp.X + fs.X)
+    if not inX then return false end
+
+    return (mp.Y >= fp.Y and mp.Y <= fp.Y + fs.Y)
+        or (mp.Y + inset >= fp.Y and mp.Y + inset <= fp.Y + fs.Y)
+        or (mp.Y - inset >= fp.Y and mp.Y - inset <= fp.Y + fs.Y)
+end
+
+function SetAutoClickerEnabled(val, force)
     if val then
         lastAutoClickerEnableTime = tick()
         if autoClickerConnection then autoClickerConnection:Disconnect() end
         autoClickerLastClick = tick()
-        autoClickerPointIndex = 0
         autoClickerConnection = RunService.RenderStepped:Connect(function()
             if not Settings.AutoClicker_Enabled then return end
+            if UserInputService:GetFocusedTextBox() then return end
+            if IsMouseOverMenu() then return end
             local currentTime = tick()
             if currentTime - autoClickerLastClick >= Settings.AutoClicker_Delay then
                 fastClick()
@@ -3466,12 +3433,22 @@ function SetAutoClickerEnabled(val)
         end)
         Settings.AutoClicker_Enabled = true
         if ToggleRefs.AutoClicker then ToggleRefs.AutoClicker.SetState(true) end
+    else
+        if not force and (tick() - lastAutoClickerEnableTime) < AUTO_CLICKER_LOCK_TIME then
+            if ToggleRefs.AutoClicker then ToggleRefs.AutoClicker.SetState(true) end
+            Settings.AutoClicker_Enabled = true
+            return
+        end
+        if autoClickerConnection then
+            autoClickerConnection:Disconnect()
+            autoClickerConnection = nil
+        end
+        Settings.AutoClicker_Enabled = false
+        if ToggleRefs.AutoClicker then ToggleRefs.AutoClicker.SetState(false) end
     end
 end
-
 -- ESP
 local ESPBoxes, NPC_ESP = {}, {}
-local npcFrozenState = {}
 
 local SKELETON_BONES = {
     {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
@@ -3680,21 +3657,6 @@ end
 Players.PlayerAdded:Connect(function(plr)
     if plr ~= LocalPlayer then
         setupChamsForPlayer(plr)
-    end
-end)
--- Отписка при выходе
-Players.PlayerRemoving:Connect(function(plr)
-    removeChamsForPlayer(plr)
-end)
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    if Settings.ESP_Chams then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then addCham(plr) end
-        end
-    end
-    if Settings.ESP_NPC_Chams then
-        UpdateNpcChams()
     end
 end)
 
@@ -4045,7 +4007,6 @@ local lastShot = 0
 local triggerFired = false
 
 -- Триггербот
-local triggerDot = nil
 local triggerReactionStart = nil
 local triggerLastTarget = nil
 local mouse1Held = false
@@ -4086,7 +4047,7 @@ function IsAimVisible(part)
     end
 
     local rayParams = RaycastParamsClass.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterType = RAYCAST_EXCLUDE
 
     local ignoreList = {lc}
     if Settings.Aim_IgnorePlayersInRaycast then
@@ -4557,7 +4518,6 @@ if fpsText then fpsText.Visible = false; fpsText.Position = Vector2.new(10,10); 
 local fpsFrames = 0; local fpsTime = tick(); local frameCounter = 0; local npcFrameCounter = 0
 local lastTabListRefresh = 0
 local tpRefreshStep = 0
-local specRefreshStep = 0
 function UpdateFPSPingDisplay()
     if not fpsText then return end
     local text = ""
@@ -4565,7 +4525,8 @@ function UpdateFPSPingDisplay()
         text = text .. "FPS: " .. fpsFrames
     end
     if Settings.ShowPing then
-        local ping = math.floor(LocalPlayer:GetNetworkPing() * 1000)
+        local Stats = game:GetService("Stats")
+        local ping = math.floor((Stats.Network.ServerStatsItem["Data Ping"]:GetValue()))
         if text ~= "" then text = text .. " | " end
         text = text .. "Ping: " .. ping .. "ms"
     end
@@ -4625,7 +4586,7 @@ local function IsVisible(part)
     local origin = Camera.CFrame.Position; local direction = (part.Position - origin); local distance = direction.Magnitude
     if distance < 0.01 then visibilityCache[key] = {value = true, time = tick()}; return true end
     local rayParams = RaycastParamsClass.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterType = RAYCAST_EXCLUDE
     rayParams.FilterDescendantsInstances = {lc}
     local result = workspace:Raycast(origin, direction.Unit * distance, rayParams)
     local val = result and result.Instance:IsDescendantOf(char) or not result
@@ -4887,13 +4848,6 @@ mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
                                                 esp.HeadDot.Visible = false
                                                 esp.HeadDotOutline.Visible = false
                                             end
-                                        end)
-                                        pcall(function()
-                                            if Settings.ESP_Distance and lc and lc:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
-                                                local dist = math.floor((lc.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude)
-                                                esp.Distance.Visible = true; esp.Distance.Position = Vector2.new(sTop.X, boxBot + 17)
-                                                esp.Distance.Text = dist .. "m"; esp.Distance.Size = Settings.ESP_DistanceSize; esp.Distance.Color = Settings.ESP_DistanceColor
-                                            else esp.Distance.Visible = false end
                                         end)
                                         -- SKELETON ESP
                                         if esp.Skeleton then
@@ -5428,9 +5382,6 @@ end
 
 -- триггербот
         if Settings.Trigger_Enabled then
-        if triggerDot then
-            triggerDot.Position = UserInputService:GetMouseLocation()
-        end
 
         local targetPart = GetTriggerTarget()
         if targetPart then
@@ -5470,7 +5421,6 @@ end
             triggerLastTarget = nil
         end
     else
-        if triggerDot then triggerDot.Visible = false end
         if mouse1Held then
             mouse1release()
             mouse1Held = false
@@ -5564,9 +5514,13 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     UpdateFlight()
     if Settings.Noclip_Enabled then UpdateNoclip() end
     if Settings.AntiAFK_Enabled then UpdateAntiAFK() end
-    if Settings.AutoClicker_Enabled then SetAutoClickerEnabled(true) end
     if Settings.Freeze_Enabled then UpdateFreeze() end
-    -- переприменяем ещё раз через секунду, чтобы перебить игровой сброс
+    if Settings.ESP_Chams then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then addCham(plr) end
+        end
+    end
+    if Settings.ESP_NPC_Chams then UpdateNpcChams() end
     task.delay(1.0, function()
         if char == LocalPlayer.Character then
             UpdateSpeed()
@@ -5606,7 +5560,7 @@ clickTPConnection  = UserInputService.InputBegan:Connect(function(input, gamePro
     local rayParams = nil
     if RaycastParamsClass then
         rayParams = RaycastParamsClass.new()
-        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+        rayParams.FilterType = RAYCAST_EXCLUDE
         rayParams.FilterDescendantsInstances = {char}
     end
     local result = workspace:Raycast(unitRay.Origin, unitRay.Direction * Settings.ClickTP_MaxDistance, rayParams)
@@ -5638,7 +5592,7 @@ function onKeyBind(input, gameProcessed)
                     if not savedMouseBehavior then savedMouseBehavior = UserInputService.MouseBehavior end
                     pcall(function() UserInputService.MouseBehavior = Enum.MouseBehavior.Default end)
                 else
-                    if savedMouseBehavior then pcall(function() UserInputService.MouseBehavior = savedMouseBehavior end) savedMouseBehavior = nil end
+                    if savedMouseBehavior then pcall(function() UserInputService.MouseBehavior = savedMouseBehavior end) end
                 end
                 if ToggleRefs.CursorUnlock then ToggleRefs.CursorUnlock.SetState(Settings.CursorUnlock_Enabled) end
             elseif action == "BHop" then
@@ -5753,7 +5707,7 @@ function FULL_UNLOAD()
         Settings.CursorUnlock_Enabled = false
         if savedMouseBehavior then
             pcall(function() UserInputService.MouseBehavior = savedMouseBehavior end)
-            savedMouseBehavior = nil
+
         end
     end
 
@@ -5775,7 +5729,6 @@ function FULL_UNLOAD()
     if flightVel then pcall(function() flightVel:Destroy() end); flightVel = nil end
 
     if FOVCircle then pcall(function() FOVCircle:Remove() end); FOVCircle = nil end
-    if triggerDot then pcall(function() triggerDot:Remove() end); triggerDot = nil end
     if Crosshair then
         for _, l in ipairs(Crosshair.Main or {}) do pcall(function() l:Remove() end) end
         for _, l in ipairs(Crosshair.Outline or {}) do pcall(function() l:Remove() end) end
@@ -6032,7 +5985,7 @@ print(Locales.t("[bobrcheats] Фоновая проверка завершена
                     UpdateSpeed()
                     UpdateFlight()
                     UpdateNoclip()
-                    SetAutoClickerEnabled(false)
+                    SetAutoClickerEnabled(false, true)
                 end
             end
         end
@@ -6064,7 +6017,7 @@ task.spawn(function()
     task.wait(0.5)
     LoadingGui:Destroy()
     ShowMainMenu()
-    print(Locales.t("[bobrcheats v23.0] Меню загружено."))
+    print(Locales.t("[bobrcheats v23.1] Меню загружено."))
 end)
 
 local ContextActionService = game:GetService("ContextActionService")
@@ -6105,4 +6058,4 @@ pcall(function()
     )
 end)
 
-print(Locales.t("[bobrcheats v23.0] Загрузка..."))
+print(Locales.t("[bobrcheats v23.1] Загрузка..."))
