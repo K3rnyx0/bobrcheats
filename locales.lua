@@ -191,6 +191,37 @@ return {
         ["BHop (Bunny Hop)"] = "BHop (Bunny Hop)",
         ["Click TP (телепорт в точку клика)"] = "Click TP (teleport to click)",
         ["Freeze Character"] = "Freeze Character",
+
+        -- ===== Head Dot =====
+        ["Точка на голове"] = "Head Dot",
+        ["Обводка"] = "Outline",
+        ["Цвет"] = "Color",
+        ["Цвет обводки"] = "Outline Color",
+        ["Толщина"] = "Thickness",
+        ["Стороны"] = "Sides",
+        ["Радиус"] = "Radius",
+        ["Авто"] = "Auto",
+        ["Фиксированный"] = "Fixed",
+        ["Фиксированный радиус"] = "Fixed Radius",
+        ["Заполнение"] = "Filled",
+
+        -- ===== ESP Outline =====
+        ["Обводка ESP"] = "ESP Outline",
+        ["Обводка рамок"] = "Box Outline",
+        ["Цвет обводки рамок"] = "Box Outline Color",
+        ["Толщина обводки рамок"] = "Box Outline Width",
+        ["Синий канал HP бара"] = "Health Bar Blue Channel",
+
+        -- ===== Tracer / Health Bar Position =====
+        ["Позиция линий"] = "Tracer Position",
+        ["Позиция HP бара"] = "Health Bar Position",
+        ["Низ"] = "Bottom",
+        ["Центр"] = "Center",
+        ["Мышь"] = "Mouse",
+        ["Сверху"] = "Top",
+        ["Снизу"] = "Bottom",
+        ["Слева"] = "Left",
+        ["Справа"] = "Right",
     },
 
     ru = {

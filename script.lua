@@ -47,7 +47,14 @@ do
             end,
             t = function(s, ...)
                 if type(s) ~= "string" then return s end
-                local langDict = dict[current] or {}
+                if current == "ru" then
+                    if select("#", ...) > 0 then
+                        local ok, r = pcall(string.format, s, ...)
+                        if ok then return r end
+                    end
+                    return s
+                end
+                local langDict = dict[current] or dict.en or {}
                 local translated = langDict[s] or s
                 if select("#", ...) > 0 then
                     local ok, r = pcall(string.format, translated, ...)
@@ -75,6 +82,7 @@ do
         }
     end
 end
+
 local savedLang = getgenv().BOBRCHEATS_LANG
 if type(savedLang) == "string" then
     Locales.set(savedLang)
@@ -586,7 +594,7 @@ local Settings = {
     ESP_HeadDotThickness = 1,
     ESP_HeadDotNumSides = 30,
     ESP_HeadDotFilled = false,
-    ESP_HeadDotRadiusMode = "Auto",
+    ESP_HeadDotRadiusMode = "Авто",
     ESP_HeadDotFixedRadius = 5,
 
     ESP_Rainbow = false,
@@ -2024,31 +2032,31 @@ CreateToggle(espPage, "Имена", function(v) Settings.ESP_Names=v end, Settin
 CreateModeSwitch(espPage, "Здоровье", {"Bar","Text","Off"}, Settings.ESP_HealthMode, function(v) Settings.ESP_HealthMode=v end)
 CreateToggle(espPage, "Дистанция", function(v) Settings.ESP_Distance=v end, Settings.ESP_Distance)
 CreateToggle(espPage, "Проверка видимости", function(v) Settings.ESP_VisibilityCheck=v end, Settings.ESP_VisibilityCheck)
-CreateFunctionRow(espPage, "Head Dot", Settings.ESP_HeadDot,
+CreateFunctionRow(espPage, "Точка на голове", Settings.ESP_HeadDot,
     function(v) Settings.ESP_HeadDot = v end,
     function(panel)
         CreateSection(panel)
-        CreateToggle(panel, "Outline", function(v) Settings.ESP_HeadDotOutline = v end, Settings.ESP_HeadDotOutline)
-        CreateColorPicker(panel, "Color", Settings.ESP_HeadDotColor, function(c) Settings.ESP_HeadDotColor = c end)
-        CreateColorPicker(panel, "Outline Color", Settings.ESP_HeadDotOutlineColor, function(c) Settings.ESP_HeadDotOutlineColor = c end)
+        CreateToggle(panel, "Обводка", function(v) Settings.ESP_HeadDotOutline = v end, Settings.ESP_HeadDotOutline)
+        CreateColorPicker(panel, "Цвет", Settings.ESP_HeadDotColor, function(c) Settings.ESP_HeadDotColor = c end)
+        CreateColorPicker(panel, "Цвет обводки", Settings.ESP_HeadDotOutlineColor, function(c) Settings.ESP_HeadDotOutlineColor = c end)
         CreateSection(panel)
-        CreateSliderInt(panel, "Thickness", 1, 5, Settings.ESP_HeadDotThickness, function(v) Settings.ESP_HeadDotThickness = v end)
-        CreateSliderInt(panel, "Sides", 6, 60, Settings.ESP_HeadDotNumSides, function(v) Settings.ESP_HeadDotNumSides = v end)
-        CreateModeSwitch(panel, "Radius", {"Auto","Fixed"}, Settings.ESP_HeadDotRadiusMode, function(v) Settings.ESP_HeadDotRadiusMode = v end)
-        CreateSliderInt(panel, "Fixed Radius", 1, 20, Settings.ESP_HeadDotFixedRadius, function(v) Settings.ESP_HeadDotFixedRadius = v end)
-        CreateToggle(panel, "Filled", function(v) Settings.ESP_HeadDotFilled = v end, Settings.ESP_HeadDotFilled)
+        CreateSliderInt(panel, "Толщина", 1, 5, Settings.ESP_HeadDotThickness, function(v) Settings.ESP_HeadDotThickness = v end)
+        CreateSliderInt(panel, "Стороны", 6, 60, Settings.ESP_HeadDotNumSides, function(v) Settings.ESP_HeadDotNumSides = v end)
+        CreateModeSwitch(panel, "Радиус", {"Авто","Фиксированный"}, Settings.ESP_HeadDotRadiusMode, function(v) Settings.ESP_HeadDotRadiusMode = v end)
+        CreateSliderInt(panel, "Фиксированный радиус", 1, 20, Settings.ESP_HeadDotFixedRadius, function(v) Settings.ESP_HeadDotFixedRadius = v end)
+        CreateToggle(panel, "Заполнение", function(v) Settings.ESP_HeadDotFilled = v end, Settings.ESP_HeadDotFilled)
     end)
 
 
-CreateFunctionRow(espPage, "ESP Outline", Settings.ESP_OutlineMaster,
+CreateFunctionRow(espPage, "Обводка ESP", Settings.ESP_OutlineMaster,
     function(v) Settings.ESP_OutlineMaster = v end,
     function(panel)
         CreateSection(panel)
-        CreateToggle(panel, "Box Outline", function(v) Settings.ESP_BoxOutline = v end, Settings.ESP_BoxOutline)
-        CreateColorPicker(panel, "Box Outline Color", Settings.ESP_BoxOutlineColor, function(c) Settings.ESP_BoxOutlineColor = c end)
-        CreateSlider(panel, "Box Outline Width", 0, 8, Settings.ESP_BoxOutlineThickness, function(v) Settings.ESP_BoxOutlineThickness = v end, 2)
+        CreateToggle(panel, "Обводка рамок", function(v) Settings.ESP_BoxOutline = v end, Settings.ESP_BoxOutline)
+        CreateColorPicker(panel, "Цвет обводки рамок", Settings.ESP_BoxOutlineColor, function(c) Settings.ESP_BoxOutlineColor = c end)
+        CreateSlider(panel, "Толщина обводки рамок", 0, 8, Settings.ESP_BoxOutlineThickness, function(v) Settings.ESP_BoxOutlineThickness = v end, 2)
         CreateSection(panel)
-        CreateSliderInt(panel, "Health Bar Blue Channel", 0, 255, Settings.ESP_HealthBarBlue, function(v) Settings.ESP_HealthBarBlue = v end)
+        CreateSliderInt(panel, "Синий канал HP бара", 0, 255, Settings.ESP_HealthBarBlue, function(v) Settings.ESP_HealthBarBlue = v end)
     end)
 CreateToggle(espPage, "Цвета команд", function(v) Settings.ESP_TeamColors=v end, Settings.ESP_TeamColors)
 
@@ -2092,17 +2100,17 @@ CreateFunctionRow(npcPage, "ESP на NPC", Settings.ESP_NPCs,
 
         -- позиции
         CreateSection(panel)
-        CreateModeSwitch(panel, "Tracer Position", {"Bottom","Center","Mouse"}, "Bottom",
+        CreateModeSwitch(panel, "Позиция линий", {"Низ","Центр","Мышь"}, "Низ",
             function(v)
-                if v == "Bottom" then Settings.ESP_NPC_TracerPosition = 1
-                elseif v == "Center" then Settings.ESP_NPC_TracerPosition = 2
+                if v == "Низ" then Settings.ESP_NPC_TracerPosition = 1
+                elseif v == "Центр" then Settings.ESP_NPC_TracerPosition = 2
                 else Settings.ESP_NPC_TracerPosition = 3 end
             end)
-        CreateModeSwitch(panel, "Health Bar Position", {"Top","Bottom","Left","Right"}, "Left",
+        CreateModeSwitch(panel, "Позиция HP бара", {"Сверху","Снизу","Слева","Справа"}, "Слева",
             function(v)
-                if v == "Top" then Settings.ESP_NPC_HealthBarPosition = 1
-                elseif v == "Bottom" then Settings.ESP_NPC_HealthBarPosition = 2
-                elseif v == "Left" then Settings.ESP_NPC_HealthBarPosition = 3
+                if v == "Сверху" then Settings.ESP_NPC_HealthBarPosition = 1
+                elseif v == "Снизу" then Settings.ESP_NPC_HealthBarPosition = 2
+                elseif v == "Слева" then Settings.ESP_NPC_HealthBarPosition = 3
                 else Settings.ESP_NPC_HealthBarPosition = 4 end
             end)
 
@@ -4846,7 +4854,7 @@ mainRenderConnection = RunService.RenderStepped:Connect(function(dt)
                                                     local dotColor = GetESPColor(Settings.ESP_HeadDotColor, tc)
 
                                                     local radius
-                                                    if Settings.ESP_HeadDotRadiusMode == "Fixed" then
+                                                    if Settings.ESP_HeadDotRadiusMode == "Фиксированный" then
                                                         radius = Settings.ESP_HeadDotFixedRadius
                                                     else
                                                         radius = math.max(3, math.abs(sTop.Y - sBot.Y) * 0.15)
